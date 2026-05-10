@@ -247,26 +247,55 @@ const DemandaModal = ({ open, onClose, editing, profile }) => {
             )}
           </div>
           <div className="mt-auto border-t border-gray-100 pt-3 relative">
-            <textarea
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 resize-none pr-12"
-              rows={2}
-              placeholder="Adicione um comentário... use @ para mencionar"
-              value={novoComentario}
-              onChange={e => setNovoComentario(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  enviarComentario();
-                }
-              }}
-            />
-            <button
-              onClick={enviarComentario}
-              disabled={!novoComentario.trim()}
-              className="absolute right-3 bottom-5 p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-            >
-              <IconChevRight size={18} />
-            </button>
+            {(() => {
+              const atMatch = novoComentario.match(/@(\w*)$/);
+              const mentionQuery = atMatch ? atMatch[1].toLowerCase() : null;
+              const mentionSuggestions = mentionQuery !== null
+                ? activeUsers.filter(u => u.nome.toLowerCase().includes(mentionQuery)).slice(0, 5)
+                : [];
+              const insertMention = (nome) => {
+                setNovoComentario(prev => prev.replace(/@\w*$/, `@${nome} `));
+              };
+              return (
+                <>
+                  {mentionSuggestions.length > 0 && (
+                    <div className="absolute bottom-full mb-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                      {mentionSuggestions.map(u => (
+                        <button
+                          key={u.id}
+                          onMouseDown={e => { e.preventDefault(); insertMention(u.nome); }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-brand-50 text-left transition-colors"
+                        >
+                          <Avatar name={u.nome} src={u.avatar} size={24}/>
+                          <span className="font-medium text-gray-800">{u.nome}</span>
+                          <span className="text-xs text-gray-400 ml-auto">{u.role === 'gestor' ? 'Gestor' : 'Funcionário'}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <textarea
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 resize-none pr-12"
+                    rows={2}
+                    placeholder="Adicione um comentário... use @ para mencionar"
+                    value={novoComentario}
+                    onChange={e => setNovoComentario(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        enviarComentario();
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={enviarComentario}
+                    disabled={!novoComentario.trim()}
+                    className="absolute right-3 bottom-5 p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                  >
+                    <IconChevRight size={18} />
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

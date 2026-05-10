@@ -31,6 +31,9 @@ const NotificationBell = ({ profile, onNavigate }) => {
       case 'demanda-prazo':      return { i: <IconClock size={14}/>,    bg: 'bg-amber-50 text-amber-700' };
       case 'pendencia-vencida':  return { i: <IconAlert size={14}/>,    bg: 'bg-rose-50 text-rose-700' };
       case 'pendencia-prazo':    return { i: <IconClock size={14}/>,    bg: 'bg-amber-50 text-amber-700' };
+      case 'mencao':             return { i: <span style={{fontSize:12}}>@</span>, bg: 'bg-brand-50 text-brand-700 font-bold' };
+      case 'comentario':         return { i: <IconDot size={14}/>,      bg: 'bg-blue-50 text-blue-700' };
+      case 'atribuicao':         return { i: <IconUser size={14}/>,     bg: 'bg-emerald-50 text-emerald-700' };
       default:                   return { i: <IconBell size={14}/>,     bg: 'bg-gray-100 text-gray-700' };
     }
   };
@@ -68,18 +71,29 @@ const NotificationBell = ({ profile, onNavigate }) => {
             <ul className="max-h-80 overflow-y-auto divide-y divide-gray-100">
               {items.map(it => {
                 const ic = iconFor(it.kind);
+                const isMencao = it.kind === 'mencao';
                 return (
-                  <li key={it.id}>
-                    <button
-                      onClick={() => { onNavigate(it.href.page); setOpen(false); }}
-                      className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50/80 transition-colors">
-                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${ic.bg}`}>{ic.i}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-[13px] font-medium text-gray-900">{it.title}</span>
-                        <span className="block text-xs text-gray-700 truncate">{it.desc}</span>
-                        <span className="block text-[11px] text-gray-500 mt-0.5">{it.sub} · {timeAgo(it.time)}</span>
-                      </span>
-                    </button>
+                  <li key={it.id} className={isMencao ? 'bg-brand-50/40' : ''}>
+                    <div className="flex items-stretch">
+                      <button
+                        onClick={() => { onNavigate(it.href.page); setOpen(false); if (it.isDb) api.markNotificacaoLida(it.id); }}
+                        className="flex-1 text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50/80 transition-colors">
+                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${ic.bg}`}>{ic.i}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className={`block text-[13px] font-medium ${isMencao ? 'text-brand-800' : 'text-gray-900'}`}>{it.title}</span>
+                          {it.desc && <span className="block text-xs text-gray-700 truncate">{it.desc}</span>}
+                          <span className="block text-[11px] text-gray-500 mt-0.5">{it.sub}{it.sub && it.time ? ' · ' : ''}{timeAgo(it.time)}</span>
+                        </span>
+                      </button>
+                      {it.isDb && (
+                        <button
+                          onClick={() => api.markNotificacaoLida(it.id)}
+                          title="Marcar como lida"
+                          className="px-2 text-gray-300 hover:text-brand-500 transition-colors shrink-0">
+                          <IconCheck size={14}/>
+                        </button>
+                      )}
+                    </div>
                   </li>
                 );
               })}
