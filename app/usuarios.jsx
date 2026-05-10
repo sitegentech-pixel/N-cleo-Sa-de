@@ -45,11 +45,22 @@ const UsuarioModal = ({ open, onClose, editing, profile }) => {
       setLoading(false);
       onClose();
     } else {
+      // Save current gestor session before signUp (signUp auto-logs into new account)
+      const { data: { session: gestorSession } } = await supabase.auth.getSession();
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email:    form.email.trim(),
         password: form.senha,
         options:  { data: { nome: form.nome.trim() } },
       });
+
+      // Always restore gestor session first, regardless of error
+      if (gestorSession) {
+        await supabase.auth.setSession({
+          access_token:  gestorSession.access_token,
+          refresh_token: gestorSession.refresh_token,
+        });
+      }
 
       if (authError) {
         let msg = authError.message;
@@ -61,14 +72,16 @@ const UsuarioModal = ({ open, onClose, editing, profile }) => {
         return;
       }
 
-      if (form.role === 'gestor' && authData.user) {
+      // Wait for trigger to create profile row before updating role/nome
+      if (authData.user) {
+        await new Promise(r => setTimeout(r, 1500));
         await supabase.from('profiles')
-          .update({ role: 'gestor', nome: form.nome.trim() })
+          .update({ role: form.role, nome: form.nome.trim() })
           .eq('id', authData.user.id);
       }
 
       await loadAll();
-      toast('Usuário cadastrado. Ele receberá e-mail de confirmação.');
+      toast('Usuário cadastrado com sucesso.');
       setLoading(false);
       onClose();
     }
