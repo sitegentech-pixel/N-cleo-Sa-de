@@ -24,7 +24,7 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
           {p.descricao && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{p.descricao}</p>}
           <div className="flex items-center justify-between mt-3">
             <div className="flex items-center gap-1.5 min-w-0">
-              <Avatar name={respName} size={20}/>
+              <Avatar name={respName} src={user?.avatar} size={20}/>
               <span className="text-[11px] text-gray-600 truncate">{respName}</span>
             </div>
             <div className={`text-[11px] inline-flex items-center gap-1 ${overdue ? 'text-rose-600 font-medium' : 'text-gray-500'}`}>

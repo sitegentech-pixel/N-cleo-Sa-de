@@ -35,9 +35,11 @@ const Equipe = ({ profile, onOpenPendenciasFor }) => {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <div className="font-medium text-gray-900 truncate">{u.nome}</div>
-                    <Badge tone={u.role === 'gestor' ? 'green' : 'gray'}>
-                      {u.role === 'gestor' ? 'Gestor' : 'Funcionário'}
-                    </Badge>
+                    {isGestor && (
+                      <Badge tone={u.role === 'gestor' ? 'green' : 'gray'}>
+                        {u.role === 'gestor' ? 'Gestor' : 'Funcionário'}
+                      </Badge>
+                    )}
                   </div>
                   <div className="text-xs text-gray-500 truncate">{u.email}</div>
                 </div>

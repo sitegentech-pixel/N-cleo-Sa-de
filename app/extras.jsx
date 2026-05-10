@@ -22,6 +22,8 @@ const NotificationBell = ({ profile, onNavigate }) => {
     const s = new Set([...seen, ...items.map(i => i.id)]);
     setSeen(s);
     sessionStorage.setItem(dismissedKey, JSON.stringify([...s]));
+    // Mark DB notifications as read
+    items.filter(i => i.isDb && !i.lida).forEach(i => api.markNotificacaoLida(i.id));
   };
 
   const iconFor = (k) => {

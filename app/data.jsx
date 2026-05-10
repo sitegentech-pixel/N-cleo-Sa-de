@@ -363,12 +363,12 @@ const api = {
       });
     }
 
-    // Processa menções: procura por @Nome
-    const mentions = texto.match(/@(\w+)/g);
-    if (mentions) {
+    // Processa menções: procura por @Palavra (primeira palavra do nome)
+    const mentions = [...new Set(texto.match(/@([\w]+)/g) || [])];
+    if (mentions.length) {
       for (const m of mentions) {
         const nomeMencionado = m.slice(1).toLowerCase();
-        const user = _state.profiles.find(p => p.nome.toLowerCase().includes(nomeMencionado));
+        const user = _state.profiles.find(p => p.nome.toLowerCase().split(' ').some(w => w.startsWith(nomeMencionado)));
         if (user && user.id !== profile.id) {
           await supabase.from('notificacoes').insert({
             usuario_id: user.id,

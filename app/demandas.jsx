@@ -411,7 +411,7 @@ const Demandas = ({ profile }) => {
                       <td className="px-3 py-3"><StatusBadgeDem status={d.status}/></td>
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
-                          <Avatar name={respName} size={22}/>
+                          <Avatar name={respName} src={user?.avatar} size={22}/>
                           <span className="text-gray-700">{respName}</span>
                         </div>
                       </td>

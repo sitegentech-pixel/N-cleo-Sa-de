@@ -1,5 +1,27 @@
 // Sidebar + top mobile bar. Tracks active page; emits role-aware items.
 
+const SidebarAvatarPicker = ({ profile }) => {
+  const ref = React.useRef(null);
+  const onPick = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 1.5 * 1024 * 1024) { toast('Imagem muito grande (máx 1.5MB).', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = () => { api.setProfileAvatar(profile.id, reader.result); toast('Foto atualizada.'); };
+    reader.readAsDataURL(file);
+    e.target.value = null;
+  };
+  return (
+    <div className="relative shrink-0 cursor-pointer group" onClick={() => ref.current?.click()} title="Trocar foto">
+      <Avatar name={profile.nome} src={profile.avatar} size={36} />
+      <span className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <IconPencil size={12} className="text-white"/>
+      </span>
+      <input ref={ref} type="file" accept="image/*" className="hidden" onChange={onPick}/>
+    </div>
+  );
+};
+
 const NavItem = ({ active, icon, label, onClick, badge }) => (
   <button
     onClick={onClick}
@@ -24,6 +46,7 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
     { id: 'pendencias',  label: 'Minhas Pendências', icon: <IconCheckSq size={18} />, badge: counts?.pendOpen },
     { id: 'demandas',    label: 'Demandas',          icon: <IconInbox size={18} />,    badge: counts?.demOpen },
     { id: 'equipe',      label: 'Equipe',            icon: <IconUsers size={18} /> },
+    { id: 'feedback',    label: 'Feedback',          icon: <IconSpark size={18} /> },
     ...(isGestor ? [{ id: 'usuarios', label: 'Usuários', icon: <IconShield size={18} /> }] : []),
   ];
 
@@ -45,12 +68,21 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
           </div>
         </div>
 
-        {/* Workspace switcher (decorative) */}
-        <div className="mx-3 mb-2 px-2.5 h-9 rounded-lg bg-gray-800/70 border border-gray-700/60 flex items-center gap-2 text-xs text-gray-300">
-          <span className="w-5 h-5 rounded-md bg-brand-600/30 text-brand-300 flex items-center justify-center"><IconSpark size={12} /></span>
-          <span className="flex-1 truncate">Workspace · Maio 2026</span>
-          <IconChevDown size={14} className="text-gray-500" />
-        </div>
+        {/* Workspace — sumário do mês */}
+        {(() => {
+          const store = useStore();
+          const mes = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+          const abertas = store.demandas.filter(d => d.status === 'aberta' || d.status === 'em-andamento').length;
+          const pendentes = store.pendencias.filter(p => p.status !== 'concluido').length;
+          return (
+            <button onClick={() => onNavigate('dashboard')}
+                    className="mx-3 mb-2 px-2.5 h-9 rounded-lg bg-gray-800/70 border border-gray-700/60 flex items-center gap-2 text-xs text-gray-300 hover:bg-gray-800 transition-colors w-[calc(100%-24px)]">
+              <span className="w-5 h-5 rounded-md bg-brand-600/30 text-brand-300 flex items-center justify-center shrink-0"><IconSpark size={12} /></span>
+              <span className="flex-1 truncate capitalize">{mes}</span>
+              <span className="shrink-0 text-[10px] text-gray-500">{abertas}D · {pendentes}P</span>
+            </button>
+          );
+        })()}
 
         {/* Nav */}
         <nav className="px-3 py-2 space-y-0.5 flex-1 overflow-y-auto">
@@ -70,12 +102,12 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
         {/* User card */}
         <div className="m-3 p-3 rounded-xl bg-gray-800/60 border border-gray-700/60">
           <div className="flex items-center gap-3">
-            <Avatar name={profile.nome} src={profile.avatar} size={36} />
+            <SidebarAvatarPicker profile={profile} />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-white truncate">{profile.nome}</div>
-              <div className="text-[11px] text-gray-400 capitalize">
-                {profile.role === 'gestor' ? 'Gestor' : 'Funcionário'}
-              </div>
+              {profile.role === 'gestor' && (
+                <div className="text-[11px] text-gray-400">Gestor</div>
+              )}
             </div>
             <button onClick={onLogout}
                     className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"

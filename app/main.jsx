@@ -5,6 +5,7 @@ const PAGE_TITLES = {
   pendencias: 'Minhas Pendências',
   demandas:   'Demandas',
   equipe:     'Equipe',
+  feedback:   'Feedback',
   usuarios:   'Usuários',
 };
 
@@ -93,6 +94,7 @@ const App = () => {
       case 'pendencias': return <Pendencias profile={profile} filterByResponsavel={pendFilter} />;
       case 'demandas':   return <Demandas profile={profile} />;
       case 'equipe':     return <Equipe profile={profile} onOpenPendenciasFor={(nome) => { setPendFilter(nome); setPage('pendencias'); }} />;
+      case 'feedback':   return <Feedback profile={profile} />;
       case 'usuarios':
         if (profile.role !== 'gestor') return <Dashboard profile={profile} onNavigate={handleNavigate}/>;
         return <Usuarios profile={profile} />;
