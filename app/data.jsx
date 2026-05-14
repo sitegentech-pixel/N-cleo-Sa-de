@@ -47,6 +47,48 @@ const avatarColor = (name = '') => {
   return avatarPalette[h % avatarPalette.length];
 };
 
+// ---------- local cache ----------
+const CACHE_KEY    = 'ns-data-cache-v1';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+
+const saveCache = () => {
+  try {
+    const payload = {
+      ts: Date.now(),
+      profiles:     _state.profiles,
+      pendencias:   _state.pendencias,
+      demandas:     _state.demandas,
+      historico:    _state.historico.slice(0, 50),
+      comentarios:  _state.comentarios,
+      anexos:       _state.anexos,
+      notificacoes: _state.notificacoes,
+      metas:        _state.metas,
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch (_) {}
+};
+
+const loadCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return false;
+    const payload = JSON.parse(raw);
+    if (!payload?.ts || Date.now() - payload.ts > CACHE_TTL_MS) return false;
+    _state.profiles     = payload.profiles     || [];
+    _state.pendencias   = payload.pendencias   || [];
+    _state.demandas     = payload.demandas     || [];
+    _state.historico    = payload.historico    || [];
+    _state.comentarios  = payload.comentarios  || [];
+    _state.anexos       = payload.anexos       || [];
+    _state.notificacoes = payload.notificacoes || [];
+    _state.metas        = payload.metas        || [];
+    _state.loaded       = true;
+    return true;
+  } catch (_) { return false; }
+};
+
+const clearCache = () => localStorage.removeItem(CACHE_KEY);
+
 // ---------- global state (Store) ----------
 const _state = {
   profiles:  [],
@@ -75,6 +117,9 @@ const useStore = () => {
 let _realtimeSubscribed = false;
 
 const loadAll = async () => {
+  const hadCache = loadCache();
+  if (hadCache) _emit();
+
   try {
     const [
       { data: profiles },
@@ -106,6 +151,7 @@ const loadAll = async () => {
     _state.metas      = metas       || [];
     _state.loaded     = true;
     _emit();
+    saveCache();
 
     if (!_realtimeSubscribed) {
       _realtimeSubscribed = true;
@@ -121,8 +167,10 @@ const loadAll = async () => {
         .subscribe();
     }
   } catch (err) {
-    _state.loadError = err.message;
-    _emit();
+    if (!_state.loaded) {
+      _state.loadError = 'Offline — exibindo dados em cache.';
+      _emit();
+    }
   }
 };
 
@@ -447,6 +495,11 @@ const api = {
   resetSeed: async () => {
     await loadAll();
     toast('Dados sincronizados com o servidor.');
+  },
+
+  clearCache: () => {
+    clearCache();
+    toast('Cache local removido.');
   },
 
   // Notifications (Derived Logic)

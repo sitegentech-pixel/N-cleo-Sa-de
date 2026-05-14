@@ -157,6 +157,8 @@ const App = () => {
           <TweakSection title="Dados do Sistema">
             <TweakButton onClick={() => api.resetSeed()}>Recarregar App</TweakButton>
             <p className="text-[11px] text-gray-500 mt-2">Sincroniza os dados com o Supabase.</p>
+            <TweakButton onClick={() => { api.clearCache(); window.location.reload(); }}>Limpar Cache Local</TweakButton>
+            <p className="text-[11px] text-gray-500 mt-2">Remove dados em cache (offline). Recarrega a página.</p>
           </TweakSection>
       </TweaksPanel>
     </div>
