@@ -7,6 +7,12 @@
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" href="/icon-192.png" type="image/png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#16a34a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Núcleo Saúde" />
 
   <!-- Open Graph -->
   <meta property="og:type"        content="website" />
@@ -109,5 +115,15 @@
   <script type="text/babel" src="./app/feedback.jsx"></script>
   <script type="text/babel" src="./app/usuarios.jsx"></script>
   <script type="text/babel" src="./app/main.jsx"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(r => console.log('[SW] registrado', r.scope))
+          .catch(e => console.error('[SW] erro', e));
+      });
+    }
+  </script>
 </body>
 </html>

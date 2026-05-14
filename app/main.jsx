@@ -1,5 +1,25 @@
 // App entry — auth state, routing, sidebar shell, role tweaks panel.
 
+const OfflineBanner = () => {
+  const [online, setOnline] = React.useState(navigator.onLine);
+  React.useEffect(() => {
+    const on  = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener('online',  on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online',  on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
+  if (online) return null;
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-amber-50 border-b border-amber-200 text-amber-800 text-xs text-center py-1.5">
+      📡 Você está offline — exibindo dados em cache.
+    </div>
+  );
+};
+
 const PAGE_TITLES = {
   dashboard:  'Dashboard',
   pendencias: 'Minhas Pendências',
@@ -103,6 +123,8 @@ const App = () => {
   };
 
   return (
+    <>
+    <OfflineBanner />
     <div className="flex min-h-screen bg-[#f7f8fa]">
       <Sidebar
         profile={profile}
@@ -138,6 +160,7 @@ const App = () => {
           </TweakSection>
       </TweaksPanel>
     </div>
+    </>
   );
 };
 
