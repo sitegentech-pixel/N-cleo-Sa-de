@@ -23,10 +23,10 @@ const ToastHost = () => {
     <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
       {items.map(t => {
         const colors = t.kind === 'error'
-          ? 'bg-rose-50 text-rose-800 border-rose-200'
+          ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-800 dark:text-rose-200 border-rose-200 dark:border-rose-800'
           : t.kind === 'info'
-          ? 'bg-sky-50 text-sky-800 border-sky-200'
-          : 'bg-white text-gray-800 border-gray-200';
+          ? 'bg-sky-50 dark:bg-sky-950/80 text-sky-800 dark:text-sky-200 border-sky-200 dark:border-sky-800'
+          : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-gray-200 dark:border-gray-700';
         const dot = t.kind === 'error' ? 'bg-rose-500' : t.kind === 'info' ? 'bg-sky-500' : 'bg-emerald-500';
         return (
           <div key={t.id}
@@ -51,12 +51,12 @@ const Spinner = ({ size = 16, className = '' }) => (
 // ---------- Badge ----------
 const Badge = ({ children, tone = 'gray', icon, className = '' }) => {
   const tones = {
-    gray:    'bg-gray-100 text-gray-600 ring-gray-200',
-    green:   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-    yellow:  'bg-amber-50 text-amber-800 ring-amber-200',
-    red:     'bg-rose-50 text-rose-700 ring-rose-200',
-    blue:    'bg-sky-50 text-sky-700 ring-sky-200',
-    violet:  'bg-violet-50 text-violet-700 ring-violet-200',
+    gray:    'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 ring-gray-200 dark:ring-gray-700',
+    green:   'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 ring-emerald-200 dark:ring-emerald-900',
+    yellow:  'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 ring-amber-200 dark:ring-amber-900',
+    red:     'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 ring-rose-200 dark:ring-rose-900',
+    blue:    'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 ring-sky-200 dark:ring-sky-900',
+    violet:  'bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 ring-violet-200 dark:ring-violet-900',
   };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ring-1 ring-inset ${tones[tone]} ${className}`}>
@@ -110,11 +110,11 @@ const Avatar = ({ name, src, size = 32, className = '' }) => {
 // ---------- EmptyState ----------
 const EmptyState = ({ title = 'Nenhum item encontrado.', subtitle, icon, action }) => (
   <div className="flex flex-col items-center justify-center text-center py-16 px-6">
-    <div className="w-14 h-14 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mb-4">
+    <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 flex items-center justify-center mb-4">
       {icon || <IconInbox size={26} />}
     </div>
-    <p className="text-gray-800 font-medium">{title}</p>
-    {subtitle && <p className="text-sm text-gray-500 mt-1 max-w-sm">{subtitle}</p>}
+    <p className="text-gray-800 dark:text-gray-200 font-medium">{title}</p>
+    {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">{subtitle}</p>}
     {action && <div className="mt-4">{action}</div>}
   </div>
 );
@@ -132,18 +132,18 @@ const Modal = ({ open, onClose, title, subtitle, children, footer, size = 'md' }
   const widths = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-3xl' };
   return (
     <div className="ns-fade-in fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className={`ns-pop-in bg-white rounded-2xl shadow-2xl w-full ${widths[size]} max-h-[90vh] flex flex-col`}>
-        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+      <div className={`ns-pop-in bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full ${widths[size]} max-h-[90vh] flex flex-col border dark:border-gray-700`}>
+        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700">
           <div>
-            <h3 className="text-base font-semibold text-gray-900 tracking-tight">{title}</h3>
-            {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight">{title}</h3>
+            {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{subtitle}</p>}
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
             <IconClose size={18} />
           </button>
         </div>
         <div className="px-6 py-5 overflow-y-auto">{children}</div>
-        {footer && <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl">{footer}</div>}
+        {footer && <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40 rounded-b-2xl">{footer}</div>}
       </div>
     </div>
   );
@@ -169,10 +169,10 @@ const Btn = (props) => {
   };
   const kinds = {
     primary:  'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-sm focus:ring-2 focus:ring-brand-500/40',
-    secondary:'bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-gray-300',
-    ghost:    'text-gray-700 hover:bg-gray-100',
+    secondary:'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600',
+    ghost:    'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
     danger:   'bg-rose-600 text-white hover:bg-rose-700',
-    dark:     'bg-gray-900 text-white hover:bg-gray-800',
+    dark:     'bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600',
   };
   return (
     <Tag
@@ -188,23 +188,23 @@ const Btn = (props) => {
 
 // ---------- Form fields ----------
 const Label = ({ children, required, htmlFor }) => (
-  <label htmlFor={htmlFor} className="block text-xs font-medium text-gray-700 mb-1.5">
+  <label htmlFor={htmlFor} className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
     {children}
     {required && <span className="text-rose-500 ml-0.5">*</span>}
   </label>
 );
 
 const inputCls =
-  "w-full bg-white border border-gray-300 rounded-lg px-3 h-10 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition disabled:bg-gray-50 disabled:text-gray-500";
+  "w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 h-10 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-500";
 
 const Input = React.forwardRef(({ error, ...rest }, ref) => (
-  <input ref={ref} className={`${inputCls} ${error ? 'border-rose-300 focus:ring-rose-500/30 focus:border-rose-500' : ''}`} {...rest} />
+  <input ref={ref} className={`${inputCls} ${error ? 'border-rose-300 dark:border-rose-600 focus:ring-rose-500/30 focus:border-rose-500' : ''}`} {...rest} />
 ));
 
 const Textarea = ({ error, rows = 3, ...rest }) => (
   <textarea
     rows={rows}
-    className={`w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition resize-none ${error ? 'border-rose-300' : ''}`}
+    className={`w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition resize-none ${error ? 'border-rose-300 dark:border-rose-600' : ''}`}
     {...rest}
   />
 );
@@ -212,7 +212,7 @@ const Textarea = ({ error, rows = 3, ...rest }) => (
 const Select = ({ error, children, ...rest }) => (
   <div className="relative">
     <select
-      className={`appearance-none w-full bg-white border border-gray-300 rounded-lg pl-3 pr-9 h-10 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition ${error ? 'border-rose-300' : ''}`}
+      className={`appearance-none w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg pl-3 pr-9 h-10 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition ${error ? 'border-rose-300 dark:border-rose-600' : ''}`}
       {...rest}
     >
       {children}
@@ -227,25 +227,25 @@ const Checkbox = ({ checked, onChange, label, hint }) => (
   <label className="flex items-start gap-3 cursor-pointer select-none">
     <span className="relative inline-flex items-center justify-center mt-0.5">
       <input type="checkbox" checked={!!checked} onChange={(e) => onChange?.(e.target.checked)} className="peer sr-only" />
-      <span className="w-[18px] h-[18px] rounded-md border border-gray-300 bg-white peer-checked:bg-brand-600 peer-checked:border-brand-600 peer-focus:ring-2 peer-focus:ring-brand-500/40 transition-colors"></span>
+      <span className="w-[18px] h-[18px] rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 peer-checked:bg-brand-600 peer-checked:border-brand-600 peer-focus:ring-2 peer-focus:ring-brand-500/40 transition-colors"></span>
       <span className="absolute text-white opacity-0 peer-checked:opacity-100 transition-opacity">
         <IconCheck size={12} strokeWidth={3} />
       </span>
     </span>
     <span>
-      <span className="block text-sm text-gray-800">{label}</span>
-      {hint && <span className="block text-xs text-gray-500 mt-0.5">{hint}</span>}
+      <span className="block text-sm text-gray-800 dark:text-gray-200">{label}</span>
+      {hint && <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">{hint}</span>}
     </span>
   </label>
 );
 
 const FieldError = ({ children }) => children
-  ? <p className="text-xs text-rose-600 mt-1.5">{children}</p>
+  ? <p className="text-xs text-rose-600 dark:text-rose-400 mt-1.5">{children}</p>
   : null;
 
 // ---------- Tabs (segmented) ----------
 const SegTabs = ({ value, onChange, items }) => (
-  <div className="inline-flex p-1 rounded-xl bg-gray-100 border border-gray-200">
+  <div className="inline-flex p-1 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
     {items.map(it => {
       const active = value === it.value;
       return (
@@ -253,11 +253,11 @@ const SegTabs = ({ value, onChange, items }) => (
           key={it.value}
           onClick={() => onChange(it.value)}
           className={`px-3 h-8 rounded-lg text-xs font-medium inline-flex items-center gap-1.5 transition-colors
-            ${active ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+            ${active ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}
         >
           {it.label}
           {it.count != null && (
-            <span className={`text-[10px] px-1.5 rounded-md ${active ? 'bg-gray-100 text-gray-600' : 'bg-gray-200/60 text-gray-500'}`}>
+            <span className={`text-[10px] px-1.5 rounded-md ${active ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300' : 'bg-gray-200/60 dark:bg-gray-700/60 text-gray-500 dark:text-gray-400'}`}>
               {it.count}
             </span>
           )}
@@ -295,34 +295,34 @@ const GlobalSearch = ({ onNavigate }) => {
   return (
     <Modal open={open} onClose={() => { setOpen(false); setTerm(''); }} size="lg">
       <div className="-mx-6 -mt-5 -mb-5">
-        <div className="p-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
           <IconSearch className="text-gray-400" />
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 bg-transparent text-gray-900 placeholder:text-gray-400 focus:outline-none text-lg"
+            className="flex-1 bg-transparent text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none text-lg"
             placeholder="Buscar pendências, demandas ou usuários..."
             value={term}
             onChange={e => setTerm(e.target.value)}
           />
-          <kbd className="hidden sm:inline-block px-2 py-1 text-xs text-gray-500 bg-gray-100 rounded border border-gray-200">ESC</kbd>
+          <kbd className="hidden sm:inline-block px-2 py-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">ESC</kbd>
         </div>
         <div className="max-h-[60vh] overflow-y-auto p-2">
           {term.length > 0 && term.length < 2 && (
-            <div className="p-4 text-center text-sm text-gray-500">Digite pelo menos 2 caracteres...</div>
+            <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">Digite pelo menos 2 caracteres...</div>
           )}
           {term.length >= 2 && results.length === 0 && (
-            <div className="p-8 text-center text-sm text-gray-500">Nenhum resultado encontrado para "{term}".</div>
+            <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">Nenhum resultado encontrado para "{term}".</div>
           )}
           {results.map((r) => (
             <button
               key={`${r.type}-${r.id}`}
               onClick={() => { onNavigate(r.nav); setOpen(false); setTerm(''); }}
-              className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 rounded-xl transition-colors group"
+              className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors group"
             >
               <Badge tone={r.type === 'Pendência' ? 'yellow' : r.type === 'Demanda' ? 'blue' : 'gray'}>{r.type}</Badge>
-              <span className="flex-1 text-sm font-medium text-gray-900 group-hover:text-brand-600 truncate">{r.title}</span>
-              <IconChevRight size={16} className="text-gray-300 group-hover:text-brand-500" />
+              <span className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 truncate">{r.title}</span>
+              <IconChevRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-brand-500" />
             </button>
           ))}
         </div>
@@ -367,9 +367,9 @@ const KeyboardShortcuts = ({ onNavigate }) => {
           { k: '/', l: 'Busca Global' },
           { k: 'ESC', l: 'Fechar modais' },
         ].map(it => (
-          <div key={it.k} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-            <span className="text-sm text-gray-700">{it.l}</span>
-            <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded-md text-xs font-mono text-gray-700">{it.k}</kbd>
+          <div key={it.k} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+            <span className="text-sm text-gray-700 dark:text-gray-300">{it.l}</span>
+            <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-xs font-mono text-gray-700 dark:text-gray-300">{it.k}</kbd>
           </div>
         ))}
       </div>
@@ -408,20 +408,20 @@ const OnboardingTour = () => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="ns-pop-in bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-        <div className="bg-brand-50 px-6 py-8 text-center relative">
-          <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 text-brand-600">
+      <div className="ns-pop-in bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border dark:border-gray-700">
+        <div className="bg-brand-50 dark:bg-brand-950/40 px-6 py-8 text-center relative border-b border-brand-100 dark:border-brand-900">
+          <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 text-brand-600 dark:text-brand-400">
             <IconSpark size={24} />
           </div>
-          <h3 className="text-lg font-bold text-gray-900">{s.title}</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{s.title}</h3>
           <div className="flex justify-center gap-1.5 mt-4">
             {steps.map((_, i) => (
-              <span key={i} className={`w-2 h-2 rounded-full ${i === step ? 'bg-brand-500' : 'bg-brand-200'}`} />
+              <span key={i} className={`w-2 h-2 rounded-full ${i === step ? 'bg-brand-500' : 'bg-brand-200 dark:bg-gray-700'}`} />
             ))}
           </div>
         </div>
         <div className="p-6 text-center">
-          <p className="text-sm text-gray-600 leading-relaxed mb-6">{s.text}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-6">{s.text}</p>
           <div className="flex gap-2">
             {step < steps.length - 1 ? (
               <>

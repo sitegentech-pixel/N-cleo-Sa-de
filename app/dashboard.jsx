@@ -3,20 +3,20 @@
 const PageHeader = ({ title, subtitle, right }) => (
   <div className="flex items-end justify-between gap-4 mb-6">
     <div>
-      <h1 className="text-[22px] font-semibold tracking-tight text-gray-900">{title}</h1>
-      {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+      <h1 className="text-[22px] font-semibold tracking-tight text-gray-900 dark:text-gray-100">{title}</h1>
+      {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
     </div>
     {right}
   </div>
 );
 
 const CountCard = ({ label, value, accent, sub, icon }) => (
-  <div className="bg-white rounded-xl border border-gray-200 shadow-card p-4 flex items-start gap-4">
+  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-4 flex items-start gap-4">
     <span className={`w-10 h-10 rounded-xl flex items-center justify-center ${accent}`}>{icon}</span>
     <div className="min-w-0 flex-1">
-      <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">{label}</div>
-      <div className="text-2xl font-semibold text-gray-900 mt-0.5 tracking-tight tabular-nums">{value}</div>
-      {sub && <div className="text-[11px] text-gray-400 mt-0.5">{sub}</div>}
+      <div className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">{label}</div>
+      <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-0.5 tracking-tight tabular-nums">{value}</div>
+      {sub && <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{sub}</div>}
     </div>
   </div>
 );
@@ -37,28 +37,28 @@ const MetaModal = ({ open, onClose, form, setForm, onSubmit, isEdit }) => {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white max-w-sm w-full rounded-2xl shadow-pop p-6" onClick={e => e.stopPropagation()}>
-        <h2 className="text-base font-semibold text-gray-900">Meta da Equipe</h2>
-        <p className="text-xs text-gray-500 mt-0.5 mb-5">Semana de {getWeekRange()}</p>
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 max-w-sm w-full rounded-2xl shadow-pop p-6" onClick={e => e.stopPropagation()}>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Meta da Equipe</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-5">Semana de {getWeekRange()}</p>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Pendências a concluir</label>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Pendências a concluir</label>
             <input
               type="number" min="1" max="99"
               value={form.pends}
               onChange={e => setForm(f => ({ ...f, pends: e.target.value }))}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               placeholder="Ex: 10"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Demandas a concluir</label>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Demandas a concluir</label>
             <input
               type="number" min="1" max="99"
               value={form.dems}
               onChange={e => setForm(f => ({ ...f, dems: e.target.value }))}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               placeholder="Ex: 5"
             />
           </div>
@@ -158,7 +158,7 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
       <div className="flex justify-end mb-6 no-print">
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:bg-gray-50 shadow-card transition"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-card transition"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
@@ -174,10 +174,10 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
         {/* ── BLOCO A — Ranking ── */}
         <section>
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Ranking da Semana</h2>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-card overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 w-10">#</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Colaborador</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 hidden sm:table-cell">Pendências</th>
@@ -186,40 +186,40 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 hidden md:table-cell w-36">Progresso</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
                 {rankingData.map((row, idx) => {
                   const isFirst = idx === 0 && row.score > 0;
                   const isZero  = row.score === 0;
                   return (
                     <tr key={row.user.id}
-                        className={`transition-colors ${isFirst ? 'bg-amber-50/50' : isZero ? 'bg-gray-50/20' : 'hover:bg-gray-50/50'}`}>
+                        className={`transition-colors ${isFirst ? 'bg-amber-50/50 dark:bg-amber-950/20' : isZero ? 'bg-gray-50/20 dark:bg-gray-900/20' : 'hover:bg-gray-50/50 dark:hover:bg-gray-700/30'}`}>
                       <td className="px-4 py-3 text-center">
                         {isFirst
                           ? <span className="text-lg leading-none">🥇</span>
-                          : <span className={`text-sm font-semibold ${isZero ? 'text-gray-300' : 'text-gray-400'}`}>{idx + 1}</span>}
+                          : <span className={`text-sm font-semibold ${isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-400'}`}>{idx + 1}</span>}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <Avatar name={row.user.nome} src={row.user.avatar} size={28}/>
-                          <span className={`text-sm font-medium ${isZero ? 'text-gray-400' : 'text-gray-800'}`}>{row.user.nome}</span>
+                          <span className={`text-sm font-medium ${isZero ? 'text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'}`}>{row.user.nome}</span>
                           {isFirst && <Badge tone="yellow">Líder</Badge>}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right text-sm tabular-nums hidden sm:table-cell">
-                        <span className={isZero ? 'text-gray-300' : 'text-gray-600'}>{row.pends}</span>
+                        <span className={isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-600 dark:text-gray-300'}>{row.pends}</span>
                       </td>
                       <td className="px-4 py-3 text-right text-sm tabular-nums hidden sm:table-cell">
-                        <span className={isZero ? 'text-gray-300' : 'text-gray-600'}>{row.dems}</span>
+                        <span className={isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-600 dark:text-gray-300'}>{row.dems}</span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className={`text-sm font-bold tabular-nums ${isFirst ? 'text-amber-600' : isZero ? 'text-gray-300' : 'text-gray-700'}`}>
+                        <span className={`text-sm font-bold tabular-nums ${isFirst ? 'text-amber-600 dark:text-amber-400' : isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-300'}`}>
                           {row.score}
                         </span>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all ${isFirst ? 'bg-amber-400' : isZero ? 'bg-gray-100' : 'bg-brand-500'}`}
+                            className={`h-full rounded-full transition-all ${isFirst ? 'bg-amber-400' : isZero ? 'bg-gray-100 dark:bg-gray-700' : 'bg-brand-500'}`}
                             style={{ width: `${row.pct}%` }}
                           />
                         </div>
@@ -236,16 +236,16 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
         <section>
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Itens em Atraso</h2>
           {overdueItems.length === 0 ? (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-8 text-center">
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-xl p-8 text-center">
               <div className="text-3xl mb-2">✅</div>
-              <div className="text-sm font-semibold text-emerald-700">Nenhum item em atraso.</div>
-              <div className="text-xs text-emerald-500 mt-1">Equipe em dia!</div>
+              <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Nenhum item em atraso.</div>
+              <div className="text-xs text-emerald-500 dark:text-emerald-400 mt-1">Equipe em dia!</div>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-card overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/60">
+                  <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Tipo</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Título</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 hidden sm:table-cell">Responsável</th>
@@ -253,20 +253,20 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 hidden sm:table-cell">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
                   {overdueItems.map(it => (
-                    <tr key={`${it._kind}-${it.id}`} className="hover:bg-rose-50/30 transition-colors">
+                    <tr key={`${it._kind}-${it.id}`} className="hover:bg-rose-50/30 dark:hover:bg-rose-950/20 transition-colors">
                       <td className="px-4 py-3">
                         <Badge tone={it._kind === 'pendencia' ? 'yellow' : 'violet'}>
                           {it._kind === 'pendencia' ? 'Pend.' : 'Dem.'}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 max-w-[200px]">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 max-w-[200px]">
                         <span className="line-clamp-1">{it.titulo}</span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{it.responsavel}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">{it.responsavel}</td>
                       <td className="px-4 py-3">
-                        <span className="text-xs font-semibold text-rose-600 inline-flex items-center gap-1">
+                        <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 inline-flex items-center gap-1">
                           <IconAlert size={11}/>{formatDate(it.prazo)}
                         </span>
                       </td>
@@ -289,19 +289,19 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
           {/* BLOCO C — Progresso da Meta */}
           <section className="flex flex-col">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Progresso da Meta</h2>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-5 flex-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 flex-1">
               {currentGoal ? (
                 <div>
                   <div className="flex items-baseline justify-between mb-3">
                     <div>
-                      <span className="text-3xl font-bold text-gray-900 tabular-nums">{concludedWk}</span>
-                      <span className="text-sm text-gray-400 ml-2">/ {goalTotal} concluídas</span>
+                      <span className="text-3xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{concludedWk}</span>
+                      <span className="text-sm text-gray-400 dark:text-gray-500 ml-2">/ {goalTotal} concluídas</span>
                     </div>
-                    <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-2.5 py-1 rounded-full font-medium">
                       {daysLeft}d restantes
                     </span>
                   </div>
-                  <div className="h-5 w-full bg-gray-100 rounded-full overflow-hidden mb-1.5">
+                  <div className="h-5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-1.5">
                     <div
                       className={`h-full rounded-full transition-all ${goalPct >= 100 ? 'bg-emerald-500' : 'bg-brand-500'}`}
                       style={{ width: `${goalPct}%` }}
@@ -309,24 +309,24 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
                   </div>
                   <div className="text-right text-sm font-bold text-brand-600 mb-5">{Math.round(goalPct)}%</div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-brand-50 rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-brand-700 tabular-nums">
+                    <div className="bg-brand-50 dark:bg-brand-950/30 rounded-xl p-4 text-center">
+                      <div className="text-2xl font-bold text-brand-700 dark:text-brand-300 tabular-nums">
                         {pendDone}
-                        <span className="text-sm text-brand-400 font-normal"> / {currentGoal.qtd_pendencias}</span>
+                        <span className="text-sm text-brand-400 dark:text-brand-500 font-normal"> / {currentGoal.qtd_pendencias}</span>
                       </div>
-                      <div className="text-xs text-brand-600 mt-1">Pendências</div>
-                      <div className="mt-2.5 h-1.5 bg-brand-100 rounded-full overflow-hidden">
+                      <div className="text-xs text-brand-600 dark:text-brand-400 mt-1">Pendências</div>
+                      <div className="mt-2.5 h-1.5 bg-brand-100 dark:bg-brand-950 rounded-full overflow-hidden">
                         <div className="h-full bg-brand-500 rounded-full"
                              style={{ width: `${Math.min(100, (pendDone / currentGoal.qtd_pendencias) * 100)}%` }}/>
                       </div>
                     </div>
-                    <div className="bg-violet-50 rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-violet-700 tabular-nums">
+                    <div className="bg-violet-50 dark:bg-violet-950/30 rounded-xl p-4 text-center">
+                      <div className="text-2xl font-bold text-violet-700 dark:text-violet-300 tabular-nums">
                         {demDone}
-                        <span className="text-sm text-violet-400 font-normal"> / {currentGoal.qtd_demandas}</span>
+                        <span className="text-sm text-violet-400 dark:text-violet-500 font-normal"> / {currentGoal.qtd_demandas}</span>
                       </div>
-                      <div className="text-xs text-violet-600 mt-1">Demandas</div>
-                      <div className="mt-2.5 h-1.5 bg-violet-100 rounded-full overflow-hidden">
+                      <div className="text-xs text-violet-600 dark:text-violet-400 mt-1">Demandas</div>
+                      <div className="mt-2.5 h-1.5 bg-violet-100 dark:bg-violet-950 rounded-full overflow-hidden">
                         <div className="h-full bg-violet-500 rounded-full"
                              style={{ width: `${Math.min(100, (demDone / currentGoal.qtd_demandas) * 100)}%` }}/>
                       </div>
@@ -337,7 +337,7 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
                 <div className="flex flex-col items-center justify-center min-h-[180px] text-center gap-4">
                   <div className="text-5xl">🎯</div>
                   <div>
-                    <div className="text-sm font-medium text-gray-600">Sem meta para esta semana.</div>
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-300">Sem meta para esta semana.</div>
                     <div className="text-xs text-gray-400 mt-1">Defina um objetivo para a equipe.</div>
                   </div>
                   <Btn kind="secondary" onClick={onMetaOpen}>Definir Meta</Btn>
@@ -349,23 +349,23 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
           {/* BLOCO D — Demandas por Status */}
           <section className="flex flex-col">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Demandas por Status</h2>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-5 flex-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 flex-1">
               <div className="space-y-5">
                 {[
                   { label: 'Abertas',      count: ds.aberta,      bar: 'bg-sky-400',     text: 'text-sky-600'     },
                   { label: 'Em Andamento', count: ds.emAndamento,  bar: 'bg-amber-400',   text: 'text-amber-600'   },
                   { label: 'Concluídas',   count: ds.concluida,    bar: 'bg-emerald-500', text: 'text-emerald-600' },
-                  { label: 'Canceladas',   count: ds.cancelada,    bar: 'bg-gray-300',    text: 'text-gray-500'    },
+                  { label: 'Canceladas',   count: ds.cancelada,    bar: 'bg-gray-300 dark:bg-gray-600',    text: 'text-gray-500 dark:text-gray-400'    },
                 ].map(row => (
                   <div key={row.label}>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${row.bar}`}/>
-                        <span className="text-xs font-medium text-gray-600">{row.label}</span>
+                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">{row.label}</span>
                       </div>
                       <span className={`text-xs font-bold tabular-nums ${row.text}`}>{row.count}</span>
                     </div>
-                    <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-3 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${row.bar}`}
                         style={{ width: `${(row.count / totalDem) * 100}%` }}
@@ -374,7 +374,7 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
                   </div>
                 ))}
               </div>
-              <div className="mt-5 pt-4 border-t border-gray-100 text-xs text-gray-400 text-right">
+              <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400 text-right">
                 {store.demandas.length} demandas no total
               </div>
             </div>
@@ -512,35 +512,35 @@ const Dashboard = ({ profile, onNavigate }) => {
           {/* Team Dashboard Cards */}
           {isGestor && (
             <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-brand-600 to-brand-800 rounded-xl p-5 shadow-card text-white relative overflow-hidden">
+              <div className="bg-gradient-to-br from-brand-600 to-brand-800 dark:from-brand-950/80 dark:to-brand-900/40 rounded-xl p-5 shadow-card text-white relative overflow-hidden dark:border dark:border-brand-800/50">
                 <div className="relative z-10">
                   <h3 className="text-brand-100 font-medium text-xs tracking-wide uppercase mb-3">Carga Atual (Equipe)</h3>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold">{store.pendencias.filter(p => p.status !== 'concluido').length}</span>
-                    <span className="text-brand-200 text-sm">pendências</span>
+                    <span className="text-brand-200 dark:text-brand-300 text-sm">pendências</span>
                   </div>
                   <div className="mt-1 flex items-baseline gap-2">
                     <span className="text-xl font-bold">{store.demandas.filter(d => d.status !== 'concluida' && d.status !== 'cancelada').length}</span>
-                    <span className="text-brand-200 text-sm">demandas</span>
+                    <span className="text-brand-200 dark:text-brand-300 text-sm">demandas</span>
                   </div>
                 </div>
-                <IconUsers size={120} className="absolute -right-8 -bottom-8 text-brand-900 opacity-20" />
+                <IconUsers size={120} className="absolute -right-8 -bottom-8 text-brand-900 opacity-20 dark:text-brand-400 dark:opacity-10" />
               </div>
 
-              <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-card flex flex-col justify-between">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-card flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-gray-500 font-medium text-xs tracking-wide uppercase">Meta Semanal</h3>
                     {currentGoal ? <Badge tone="green">Ativa</Badge> : <Badge tone="gray">Não definida</Badge>}
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-gray-900 tabular-nums">{weekStats.conclusoes}</span>
-                    <span className="text-gray-500 text-sm">/ {currentGoal ? (currentGoal.qtd_pendencias + currentGoal.qtd_demandas) : '?'} concluídas</span>
+                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{weekStats.conclusoes}</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm">/ {currentGoal ? (currentGoal.qtd_pendencias + currentGoal.qtd_demandas) : '?'} concluídas</span>
                   </div>
                 </div>
                 {currentGoal ? (
                   <div className="mt-4">
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div className="h-full bg-emerald-500 transition-all" style={{ width: `${Math.min(100, (weekStats.conclusoes / (currentGoal.qtd_pendencias + currentGoal.qtd_demandas)) * 100)}%` }} />
                     </div>
                     {profile.role === 'gestor' && (
@@ -552,29 +552,29 @@ const Dashboard = ({ profile, onNavigate }) => {
                     {profile.role === 'gestor' ? (
                       <Btn size="sm" kind="secondary" className="w-full text-xs" onClick={handleMetaOpen}>Definir Meta da Equipe</Btn>
                     ) : (
-                      <div className="text-center text-xs text-gray-400 py-2">O gestor ainda não definiu a meta da semana.</div>
+                      <div className="text-center text-xs text-gray-400 dark:text-gray-500 py-2">O gestor ainda não definiu a meta da semana.</div>
                     )}
                   </div>
                 )}
               </div>
 
-              <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-card">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-card">
                 <h3 className="text-gray-500 font-medium text-xs tracking-wide uppercase mb-4">Destaque da Semana</h3>
                 {weekStats.bestUser ? (
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Avatar name={weekStats.bestUser.nome} src={weekStats.bestUser.avatar} size={48} />
-                      <div className="absolute -bottom-1 -right-1 bg-amber-400 text-white rounded-full p-1 border-2 border-white shadow-sm">
+                      <div className="absolute -bottom-1 -right-1 bg-amber-400 text-white rounded-full p-1 border-2 border-white dark:border-gray-800 shadow-sm">
                         <IconSpark size={10} />
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-gray-900">{weekStats.bestUser.nome.split(' ')[0]}</div>
-                      <div className="text-xs text-emerald-600 font-medium mt-0.5">Mais produtivo</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-gray-100">{weekStats.bestUser.nome.split(' ')[0]}</div>
+                      <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">Mais produtivo</div>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-12 text-sm text-gray-400 italic">
+                  <div className="flex items-center justify-center h-12 text-sm text-gray-400 dark:text-gray-500 italic">
                     Nenhuma conclusão...
                   </div>
                 )}
@@ -590,9 +590,9 @@ const Dashboard = ({ profile, onNavigate }) => {
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <CountCard label="Não Concluídas" value={pendBy('nao-concluido')} accent="bg-rose-50 text-rose-600"      icon={<IconCircle size={18} />} sub="Aguardando início" />
-            <CountCard label="Em Andamento"   value={pendBy('em-andamento')}  accent="bg-amber-50 text-amber-600"     icon={<IconClock size={18} />}  sub="Com você agora" />
-            <CountCard label="Concluídas"     value={pendBy('concluido')}     accent="bg-emerald-50 text-emerald-600" icon={<IconCheck size={18} />}  sub="Últimos 30 dias" />
+            <CountCard label="Não Concluídas" value={pendBy('nao-concluido')} accent="bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400"      icon={<IconCircle size={18} />} sub="Aguardando início" />
+            <CountCard label="Em Andamento"   value={pendBy('em-andamento')}  accent="bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400"     icon={<IconClock size={18} />}  sub="Com você agora" />
+            <CountCard label="Concluídas"     value={pendBy('concluido')}     accent="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400" icon={<IconCheck size={18} />}  sub="Últimos 30 dias" />
           </div>
 
           {/* Demandas */}
@@ -603,10 +603,10 @@ const Dashboard = ({ profile, onNavigate }) => {
             </button>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <CountCard label="Abertas"      value={demBy('aberta')}       accent="bg-sky-50 text-sky-600"         icon={<IconInbox size={18} />} />
-            <CountCard label="Em Andamento" value={demBy('em-andamento')} accent="bg-amber-50 text-amber-600"     icon={<IconClock size={18} />} />
-            <CountCard label="Concluídas"   value={demBy('concluida')}    accent="bg-emerald-50 text-emerald-600" icon={<IconCheck size={18} />} />
-            <CountCard label="Canceladas"   value={demBy('cancelada')}    accent="bg-gray-100 text-gray-500"      icon={<IconClose size={18} />} />
+            <CountCard label="Abertas"      value={demBy('aberta')}       accent="bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400"         icon={<IconInbox size={18} />} />
+            <CountCard label="Em Andamento" value={demBy('em-andamento')} accent="bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400"     icon={<IconClock size={18} />} />
+            <CountCard label="Concluídas"   value={demBy('concluida')}    accent="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400" icon={<IconCheck size={18} />} />
+            <CountCard label="Canceladas"   value={demBy('cancelada')}    accent="bg-gray-100 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400"      icon={<IconClose size={18} />} />
           </div>
 
           {/* Pendências chart */}
@@ -617,36 +617,36 @@ const Dashboard = ({ profile, onNavigate }) => {
           {/* Two columns */}
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Activity */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-card">
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card">
+              <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900">Atividade recente</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Últimas atualizações de pendências e demandas.</p>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atividade recente</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Últimas atualizações de pendências e demandas.</p>
                 </div>
                 <Badge tone="gray">{recent.length}</Badge>
               </div>
               {recent.length === 0
                 ? <EmptyState title="Sem atividade ainda." subtitle="Crie sua primeira pendência ou demanda para vê-la aqui." />
-                : <ul className="divide-y divide-gray-100">
+                : <ul className="divide-y divide-gray-100 dark:divide-gray-700/50">
                     {recent.map(it => {
                       const overdue = it._kind === 'pendencia'
                         ? isOverdue(it.prazo, it.status, 'concluido')
                         : isOverdue(it.prazo, it.status, 'concluida');
                       return (
-                        <li key={`${it._kind}-${it.id}`} className="px-5 py-3 flex items-center gap-4 hover:bg-gray-50/60 transition-colors">
+                        <li key={`${it._kind}-${it.id}`} className="px-5 py-3 flex items-center gap-4 hover:bg-gray-50/60 dark:hover:bg-gray-700/30 transition-colors">
                           <span className={`w-9 h-9 rounded-lg flex items-center justify-center
-                            ${it._kind === 'pendencia' ? 'bg-brand-50 text-brand-700' : 'bg-violet-50 text-violet-700'}`}>
+                            ${it._kind === 'pendencia' ? 'bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300' : 'bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300'}`}>
                             {it._kind === 'pendencia' ? <IconCheckSq size={16}/> : <IconInbox size={16}/>}
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-gray-900 truncate">{it.titulo}</span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{it.titulo}</span>
                               {it.urgente && <Badge tone="red" icon={<IconBolt size={10}/>}>Urgente</Badge>}
                               {overdue && <Badge tone="red" icon={<IconAlert size={10}/>}>Vencido</Badge>}
                             </div>
-                            <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-2">
                               <span>{it.responsavel}</span>
-                              <span className="text-gray-300">·</span>
+                              <span className="text-gray-300 dark:text-gray-600">·</span>
                               <span>{timeAgo(it.updated_at)}</span>
                             </div>
                           </div>
@@ -660,9 +660,9 @@ const Dashboard = ({ profile, onNavigate }) => {
             </div>
 
             {/* Focus today */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-card">
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Foco para hoje</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card">
+              <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Foco para hoje</h3>
                 <button onClick={() => onNavigate('pendencias')} className="text-xs text-brand-700 hover:text-brand-800 font-medium">Abrir</button>
               </div>
               {focusToday.length === 0
@@ -671,21 +671,21 @@ const Dashboard = ({ profile, onNavigate }) => {
                     {focusToday.map(p => {
                       const overdue = isOverdue(p.prazo, p.status, 'concluido');
                       return (
-                        <li key={p.id} className="rounded-lg border border-gray-200 p-3 hover:border-brand-300 hover:bg-brand-50/40 transition-colors cursor-pointer"
+                        <li key={p.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 hover:border-brand-300 dark:hover:border-brand-700 hover:bg-brand-50/40 dark:hover:bg-brand-950/20 transition-colors cursor-pointer"
                             onClick={() => onNavigate('pendencias')}>
                           <div className="flex items-start gap-2">
                             <span className={`mt-1 w-2 h-2 rounded-full ${
                               p.status === 'em-andamento' ? 'bg-amber-400' : 'bg-rose-500'
                             }`} />
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 truncate">{p.titulo}</div>
-                              <div className="text-[11px] text-gray-500 mt-0.5 flex items-center gap-2">
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{p.titulo}</div>
+                              <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-2">
                                 <IconCal size={11} />
-                                <span className={overdue ? 'text-rose-600 font-medium' : ''}>
+                                <span className={overdue ? 'text-rose-600 dark:text-rose-400 font-medium' : ''}>
                                   {overdue && <IconAlert size={10} className="inline -mt-0.5 mr-0.5" />}
                                   {formatDate(p.prazo)}
                                 </span>
-                                <span className="text-gray-300">·</span>
+                                <span className="text-gray-300 dark:text-gray-600">·</span>
                                 <span>{p.responsavel}</span>
                               </div>
                             </div>

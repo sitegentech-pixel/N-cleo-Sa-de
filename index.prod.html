@@ -31,8 +31,17 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Dark mode: apply class before render to prevent FOUC -->
+  <script>
+    (function(){
+      var v = localStorage.getItem('ns-dark');
+      if (v === 'true') document.documentElement.classList.add('dark');
+    })();
+  </script>
+
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -92,6 +101,12 @@
     /* ---- misc ---- */
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
+
+    /* ---- dark mode overrides ---- */
+    .dark .ns-login-bg { background: #0f172a; }
+
+    /* ---- page transition ---- */
+    main { transition: opacity 120ms ease; }
   </style>
 </head>
 <body>

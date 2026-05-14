@@ -35,8 +35,7 @@
   <script>
     (function(){
       var v = localStorage.getItem('ns-dark');
-      var mq = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (v === 'true' || (v === null && mq)) document.documentElement.classList.add('dark');
+      if (v === 'true') document.documentElement.classList.add('dark');
     })();
   </script>
 

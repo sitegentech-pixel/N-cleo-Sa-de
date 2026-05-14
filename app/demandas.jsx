@@ -149,26 +149,26 @@ const DemandaModal = ({ open, onClose, editing, profile }) => {
           {editing && (
             <div className="pt-2">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-gray-400"><IconHistory size={14}/></span>
-                <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Histórico</h4>
-                <span className="text-[11px] text-gray-400">{historico.length} {historico.length === 1 ? 'alteração' : 'alterações'}</span>
+                <span className="text-gray-400 dark:text-gray-500"><IconHistory size={14}/></span>
+                <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Histórico</h4>
+                <span className="text-[11px] text-gray-400 dark:text-gray-500">{historico.length} {historico.length === 1 ? 'alteração' : 'alterações'}</span>
               </div>
               {historico.length === 0 ? (
-                <div className="text-xs text-gray-500 italic px-3 py-4 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="text-xs text-gray-500 dark:text-gray-400 italic px-3 py-4 bg-gray-50 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-800">
                   Nenhuma alteração registrada ainda.
                 </div>
               ) : (
-                <ol className="relative border-l border-gray-200 ml-2 pl-5 space-y-3 max-h-56 overflow-y-auto pr-2">
+                <ol className="relative border-l border-gray-200 dark:border-gray-700 ml-2 pl-5 space-y-3 max-h-56 overflow-y-auto pr-2">
                   {historico.map(h => (
                     <li key={h.id} className="relative">
-                      <span className="absolute -left-[26px] top-1.5 w-2.5 h-2.5 rounded-full bg-white border-2 border-brand-500" />
-                      <div className="text-xs text-gray-700">
-                        <span className="font-medium text-gray-900">{h.campo}</span> alterado de{' '}
-                        <span className="px-1.5 py-0.5 bg-rose-50 text-rose-700 rounded font-mono text-[11px]">{h.valor_antigo || '—'}</span>{' '}
+                      <span className="absolute -left-[26px] top-1.5 w-2.5 h-2.5 rounded-full bg-white dark:bg-gray-800 border-2 border-brand-500" />
+                      <div className="text-xs text-gray-700 dark:text-gray-300">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{h.campo}</span> alterado de{' '}
+                        <span className="px-1.5 py-0.5 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded font-mono text-[11px]">{h.valor_antigo || '—'}</span>{' '}
                         para{' '}
-                        <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded font-mono text-[11px]">{h.valor_novo || '—'}</span>
+                        <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded font-mono text-[11px]">{h.valor_novo || '—'}</span>
                       </div>
-                      <div className="text-[11px] text-gray-500 mt-0.5">por {h.editado_por} · {timeAgo(h.criado_em)}</div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">por {h.editado_por} · {timeAgo(h.criado_em)}</div>
                     </li>
                   ))}
                 </ol>
@@ -181,31 +181,31 @@ const DemandaModal = ({ open, onClose, editing, profile }) => {
       {editing && tab === 'anexos' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-gray-900">Anexos ({anexos.length})</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Anexos ({anexos.length})</h4>
             <Btn size="sm" icon={<IconPlus size={14}/>} onClick={() => uploadRef.current?.click()}>Enviar Arquivo</Btn>
             <input type="file" className="hidden" ref={uploadRef} onChange={handleUpload} />
           </div>
           {anexos.length === 0 ? (
-            <div className="text-center py-10 bg-gray-50 border border-gray-100 border-dashed rounded-xl">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-400 mx-auto shadow-sm mb-3">
+            <div className="text-center py-10 bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800 border-dashed rounded-xl">
+              <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 dark:text-gray-500 mx-auto shadow-sm mb-3">
                 <IconInbox size={20}/>
               </div>
-              <p className="text-sm text-gray-600 font-medium">Nenhum arquivo anexado</p>
-              <p className="text-xs text-gray-400 mt-1">Envie PDFs, imagens ou documentos</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Nenhum arquivo anexado</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Envie PDFs, imagens ou documentos</p>
             </div>
           ) : (
             <div className="space-y-2">
               {anexos.map(a => {
                 const u = store.profiles.find(p => p.id === a.autor_id);
                 return (
-                  <div key={a.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg group">
-                    <a href={a.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 min-w-0 flex-1 hover:text-brand-600">
-                      <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center shrink-0">
-                        <IconMenu size={14} className="text-gray-400"/>
+                  <div key={a.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg group">
+                    <a href={a.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 min-w-0 flex-1 hover:text-brand-600 dark:hover:text-brand-400">
+                      <div className="w-8 h-8 rounded bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center shrink-0">
+                        <IconMenu size={14} className="text-gray-400 dark:text-gray-500"/>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate group-hover:text-brand-600">{a.nome_arquivo}</p>
-                        <p className="text-[11px] text-gray-500">Enviado por {u?.nome || 'Desconhecido'} · {timeAgo(a.criado_em)}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-brand-600 dark:group-hover:text-brand-400">{a.nome_arquivo}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400">Enviado por {u?.nome || 'Desconhecido'} · {timeAgo(a.criado_em)}</p>
                       </div>
                     </a>
                     {isGestor && (
@@ -226,7 +226,7 @@ const DemandaModal = ({ open, onClose, editing, profile }) => {
           <div className="flex-1 overflow-y-auto pr-2 space-y-4">
             {comentarios.length === 0 ? (
               <div className="text-center py-10">
-                <p className="text-sm text-gray-500 italic">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 italic">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
               </div>
             ) : (
               comentarios.map(c => {
@@ -236,8 +236,8 @@ const DemandaModal = ({ open, onClose, editing, profile }) => {
                   <div key={c.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
                     <Avatar name={u?.nome || '?'} src={u?.avatar} size={28}/>
                     <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
-                      <span className="text-[11px] text-gray-500 mb-1">{u?.nome?.split(' ')[0]} · {timeAgo(c.criado_em)}</span>
-                      <div className={`px-3 py-2 rounded-2xl text-sm ${isMe ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none'}`}>
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">{u?.nome?.split(' ')[0]} · {timeAgo(c.criado_em)}</span>
+                      <div className={`px-3 py-2 rounded-2xl text-sm ${isMe ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none'}`}>
                         {c.texto}
                       </div>
                     </div>
@@ -259,22 +259,22 @@ const DemandaModal = ({ open, onClose, editing, profile }) => {
               return (
                 <>
                   {mentionSuggestions.length > 0 && (
-                    <div className="absolute bottom-full mb-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                    <div className="absolute bottom-full mb-1 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50">
                       {mentionSuggestions.map(u => (
                         <button
                           key={u.id}
                           onMouseDown={e => { e.preventDefault(); insertMention(u.nome); }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-brand-50 text-left transition-colors"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-gray-700 text-left transition-colors"
                         >
                           <Avatar name={u.nome} src={u.avatar} size={24}/>
-                          <span className="font-medium text-gray-800">{u.nome}</span>
-                          <span className="text-xs text-gray-400 ml-auto">{u.role === 'gestor' ? 'Gestor' : 'Funcionário'}</span>
+                          <span className="font-medium text-gray-800 dark:text-gray-200">{u.nome}</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">{u.role === 'gestor' ? 'Gestor' : 'Funcionário'}</span>
                         </button>
                       ))}
                     </div>
                   )}
                   <textarea
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 resize-none pr-12"
+                    className="w-full bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 resize-none pr-12"
                     rows={2}
                     placeholder="Adicione um comentário... use @ para mencionar"
                     value={novoComentario}
@@ -354,8 +354,8 @@ const Demandas = ({ profile }) => {
         )}
       />
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-card overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100 flex flex-wrap items-center gap-3">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex flex-wrap items-center gap-3">
           <SegTabs value={tab} onChange={setTab} items={[
             { value: 'todas',        label: 'Todas',        count: counts.todas },
             { value: 'aberta',       label: 'Abertas',      count: counts['aberta'] },
@@ -364,11 +364,11 @@ const Demandas = ({ profile }) => {
             { value: 'cancelada',    label: 'Canceladas',   count: counts['cancelada'] },
           ]}/>
           <div className="ml-auto relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size={14}/></span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"><IconSearch size={14}/></span>
             <input
               value={q} onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar por título ou responsável..."
-              className="bg-white border border-gray-300 rounded-lg pl-9 pr-3 h-9 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500"
+              className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg pl-9 pr-3 h-9 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500"
             />
           </div>
         </div>
@@ -380,7 +380,7 @@ const Demandas = ({ profile }) => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/60">
+                <tr className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50/60 dark:bg-gray-900/40">
                   <th className="px-5 py-2.5 w-[40%]">Título</th>
                   <th className="px-3 py-2.5">Status</th>
                   <th className="px-3 py-2.5">Responsável</th>
@@ -389,22 +389,22 @@ const Demandas = ({ profile }) => {
                   <th className="px-3 py-2.5 text-right pr-5">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
                 {pageItems.map(d => {
                   const overdue = isOverdue(d.prazo, d.status, 'concluida') && d.status !== 'cancelada';
                   const user = store.profiles.find(x => x.id === d.responsavel_id);
                   const respName = user ? user.nome : d.responsavel;
                   return (
-                    <tr key={d.id} className="hover:bg-gray-50/70 cursor-pointer transition-colors group"
+                    <tr key={d.id} className="hover:bg-gray-50/70 dark:hover:bg-gray-700/30 cursor-pointer transition-colors group"
                         onClick={() => setModal({ open: true, editing: d })}>
                       <td className="px-5 py-3">
                         <div className="flex items-start gap-2">
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900 truncate">{d.titulo}</span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100 truncate">{d.titulo}</span>
                               {d.urgente && <Badge tone="red" icon={<IconBolt size={10}/>}>Urgente</Badge>}
                             </div>
-                            {d.descricao && <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{d.descricao}</div>}
+                            {d.descricao && <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{d.descricao}</div>}
                           </div>
                         </div>
                       </td>
@@ -412,12 +412,12 @@ const Demandas = ({ profile }) => {
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
                           <Avatar name={respName} src={user?.avatar} size={22}/>
-                          <span className="text-gray-700">{respName}</span>
+                          <span className="text-gray-700 dark:text-gray-300">{respName}</span>
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-gray-600">{d.criado_por}</td>
+                      <td className="px-3 py-3 text-gray-600 dark:text-gray-400">{d.criado_por}</td>
                       <td className="px-3 py-3">
-                        <span className={`inline-flex items-center gap-1 ${overdue ? 'text-rose-600 font-medium' : 'text-gray-700'}`}>
+                        <span className={`inline-flex items-center gap-1 ${overdue ? 'text-rose-600 dark:text-rose-400 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
                           {overdue && <IconAlert size={12}/>}
                           {formatDate(d.prazo)}
                         </span>
@@ -425,12 +425,12 @@ const Demandas = ({ profile }) => {
                       <td className="px-3 py-3 text-right pr-5">
                         <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={(e) => { e.stopPropagation(); setModal({ open: true, editing: d }); }}
-                                  className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100" title="Editar">
+                                  className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" title="Editar">
                             <IconPencil size={14}/>
                           </button>
                           {isGestor && (
                             <button onClick={(e) => { e.stopPropagation(); onDelete(d); }}
-                                    className="p-1.5 rounded-md text-gray-400 hover:text-rose-600 hover:bg-rose-50" title="Excluir">
+                                    className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30" title="Excluir">
                               <IconTrash size={14}/>
                             </button>
                           )}
@@ -445,10 +445,10 @@ const Demandas = ({ profile }) => {
         )}
 
         {filtered.length > PER && (
-          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+          <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>Mostrando {(page - 1) * PER + 1}–{Math.min(page * PER, filtered.length)} de {filtered.length}</span>
             <div className="flex items-center gap-1.5">
-              <Btn kind="secondary" size="sm" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Anterior</Btn>
+               <Btn kind="secondary" size="sm" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Anterior</Btn>
               <span className="px-2 tabular-nums">Página {page} de {totalPages}</span>
               <Btn kind="secondary" size="sm" disabled={page === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Próxima</Btn>
             </div>

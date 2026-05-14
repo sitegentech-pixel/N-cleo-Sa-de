@@ -24,25 +24,25 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
       draggable
       onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; onDragStart(p.id); }}
       onDragEnd={onDragEnd}
-      className={`group bg-white border border-gray-200 rounded-xl p-3.5 shadow-card hover:shadow-pop hover:border-gray-300 transition cursor-grab active:cursor-grabbing
+      className={`group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3.5 shadow-card hover:shadow-pop hover:border-gray-300 dark:hover:border-gray-600 transition cursor-grab active:cursor-grabbing
                   ${dragging ? 'ns-dragging' : ''}`}
     >
       <div className="flex items-start gap-2">
-        <span className={isMobile ? 'hidden' : 'text-gray-300 group-hover:text-gray-400 mt-0.5 shrink-0'}>
+        <span className={isMobile ? 'hidden' : 'text-gray-300 dark:text-gray-600 group-hover:text-gray-400 dark:group-hover:text-gray-500 mt-0.5 shrink-0'}>
           <IconDrag size={14}/>
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <div className="text-sm font-semibold text-gray-900 leading-snug">{p.titulo}</div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug">{p.titulo}</div>
             {p.urgente && <Badge tone="red" icon={<IconBolt size={10}/>}>Urgente</Badge>}
           </div>
-          {p.descricao && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{p.descricao}</p>}
+          {p.descricao && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{p.descricao}</p>}
           <div className="flex items-center justify-between mt-3">
             <div className="flex items-center gap-1.5 min-w-0">
               <Avatar name={respName} src={user?.avatar} size={20}/>
-              <span className="text-[11px] text-gray-600 truncate">{respName}</span>
+              <span className="text-[11px] text-gray-600 dark:text-gray-300 truncate">{respName}</span>
             </div>
-            <div className={`text-[11px] inline-flex items-center gap-1 ${overdue ? 'text-rose-600 font-medium' : 'text-gray-500'}`}>
+            <div className={`text-[11px] inline-flex items-center gap-1 ${overdue ? 'text-rose-600 dark:text-rose-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
               {overdue ? <IconAlert size={11}/> : <IconCal size={11}/>}
               {formatDate(p.prazo)}
             </div>
@@ -54,7 +54,7 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
           <button
             onClick={() => onMove(p, -1)}
             disabled={colIndex === 0}
-            className="flex-1 bg-gray-100 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium hover:opacity-80 transition-opacity active:scale-95 disabled:opacity-40"
+            className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg px-3 py-1.5 text-xs font-medium hover:opacity-80 transition-opacity active:scale-95 disabled:opacity-40"
           >
             ← Voltar
           </button>
@@ -69,13 +69,13 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
       ) : (
         <div className="mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button onClick={() => onEdit(p)}
-                  className="ml-auto p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                  className="ml-auto p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   title="Editar">
             <IconPencil size={14}/>
           </button>
           {canDelete && (
             <button onClick={() => onDelete(p)}
-                    className="p-1.5 rounded-md text-gray-400 hover:text-rose-600 hover:bg-rose-50"
+                    className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                     title="Excluir">
               <IconTrash size={14}/>
             </button>
@@ -91,18 +91,18 @@ const KanbanColumn = ({ status, label, headerColor, headerDot, items, onDropTo, 
     onDragOver={(e) => { e.preventDefault(); onDragOver(status); }}
     onDragLeave={() => onDragOver(null)}
     onDrop={(e) => { e.preventDefault(); onDropTo(status); }}
-    className={`flex flex-col bg-gray-50/60 border border-gray-200 rounded-2xl min-h-[200px]
+    className={`flex flex-col bg-gray-50/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-2xl min-h-[200px]
       ${isMobile ? 'min-w-[85vw] snap-start' : ''}
       ${isOver ? 'ns-drag-over' : ''}`}
   >
     <div className="px-4 pt-4 pb-3 flex items-center gap-2.5">
       <span className={`w-2.5 h-2.5 rounded-full ${headerDot}`}></span>
-      <h3 className="text-sm font-semibold text-gray-800">{label}</h3>
-      <span className="text-[11px] text-gray-500 bg-white border border-gray-200 px-1.5 rounded-md tabular-nums">{items.length}</span>
+      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{label}</h3>
+      <span className="text-[11px] text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-1.5 rounded-md tabular-nums">{items.length}</span>
     </div>
     <div className="px-3 pb-3 space-y-2 flex-1 overflow-y-auto">
       {items.length === 0
-        ? <div className="text-center text-xs text-gray-400 py-8 border border-dashed border-gray-200 rounded-xl mx-1">
+        ? <div className="text-center text-xs text-gray-400 dark:text-gray-600 py-8 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl mx-1">
             {isMobile ? 'Vazio' : 'Solte cards aqui'}
           </div>
         : items.map(p => (
@@ -358,7 +358,7 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
           {cols.map((_, i) => (
             <span
               key={i}
-              className={`w-2 h-2 rounded-full transition-colors ${i === activeCol ? 'bg-brand-600' : 'bg-gray-300'}`}
+              className={`w-2 h-2 rounded-full transition-colors ${i === activeCol ? 'bg-brand-600 dark:bg-brand-500' : 'bg-gray-300 dark:bg-gray-700'}`}
             />
           ))}
         </div>

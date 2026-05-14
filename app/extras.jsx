@@ -28,15 +28,15 @@ const NotificationBell = ({ profile, onNavigate }) => {
 
   const iconFor = (k) => {
     switch (k) {
-      case 'nova-demanda':       return { i: <IconInbox size={14}/>,    bg: 'bg-violet-50 text-violet-700' };
-      case 'demanda-vencida':    return { i: <IconAlert size={14}/>,    bg: 'bg-rose-50 text-rose-700' };
-      case 'demanda-prazo':      return { i: <IconClock size={14}/>,    bg: 'bg-amber-50 text-amber-700' };
-      case 'pendencia-vencida':  return { i: <IconAlert size={14}/>,    bg: 'bg-rose-50 text-rose-700' };
-      case 'pendencia-prazo':    return { i: <IconClock size={14}/>,    bg: 'bg-amber-50 text-amber-700' };
-      case 'mencao':             return { i: <span style={{fontSize:12}}>@</span>, bg: 'bg-brand-50 text-brand-700 font-bold' };
-      case 'comentario':         return { i: <IconDot size={14}/>,      bg: 'bg-blue-50 text-blue-700' };
-      case 'atribuicao':         return { i: <IconUser size={14}/>,     bg: 'bg-emerald-50 text-emerald-700' };
-      default:                   return { i: <IconBell size={14}/>,     bg: 'bg-gray-100 text-gray-700' };
+      case 'nova-demanda':       return { i: <IconInbox size={14}/>,    bg: 'bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300' };
+      case 'demanda-vencida':    return { i: <IconAlert size={14}/>,    bg: 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300' };
+      case 'demanda-prazo':      return { i: <IconClock size={14}/>,    bg: 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300' };
+      case 'pendencia-vencida':  return { i: <IconAlert size={14}/>,    bg: 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300' };
+      case 'pendencia-prazo':    return { i: <IconClock size={14}/>,    bg: 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300' };
+      case 'mencao':             return { i: <span style={{fontSize:12}}>@</span>, bg: 'bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 font-bold' };
+      case 'comentario':         return { i: <IconDot size={14}/>,      bg: 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300' };
+      case 'atribuicao':         return { i: <IconUser size={14}/>,     bg: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300' };
+      default:                   return { i: <IconBell size={14}/>,     bg: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' };
     }
   };
 
@@ -53,45 +53,45 @@ const NotificationBell = ({ profile, onNavigate }) => {
         )}
       </button>
       {open && (
-        <div className="ns-pop-in absolute right-0 mt-2 w-[340px] max-w-[92vw] bg-white rounded-xl border border-gray-200 shadow-pop z-50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div className="ns-pop-in absolute right-0 mt-2 w-[340px] max-w-[92vw] bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-pop z-50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <div>
-              <div className="text-sm font-semibold text-gray-900">Notificações</div>
-              <div className="text-[11px] text-gray-500">Atualizado há instantes</div>
+              <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Notificações</div>
+              <div className="text-[11px] text-gray-500 dark:text-gray-400">Atualizado há instantes</div>
             </div>
             <Badge tone="gray">{items.length}</Badge>
           </div>
           {items.length === 0 ? (
             <div className="py-10 px-6 text-center">
-              <div className="w-10 h-10 mx-auto rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center mb-2">
+              <div className="w-10 h-10 mx-auto rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 flex items-center justify-center mb-2">
                 <IconBell size={18}/>
               </div>
-              <p className="text-sm text-gray-700 font-medium">Tudo em dia.</p>
-              <p className="text-[11px] text-gray-500 mt-1">Você verá aqui novas demandas e prazos próximos.</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">Tudo em dia.</p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Você verá aqui novas demandas e prazos próximos.</p>
             </div>
           ) : (
-            <ul className="max-h-80 overflow-y-auto divide-y divide-gray-100">
+            <ul className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50">
               {items.map(it => {
                 const ic = iconFor(it.kind);
                 const isMencao = it.kind === 'mencao';
                 return (
-                  <li key={it.id} className={isMencao ? 'bg-brand-50/40' : ''}>
+                  <li key={it.id} className={isMencao ? 'bg-brand-50/40 dark:bg-brand-950/20' : ''}>
                     <div className="flex items-stretch">
                       <button
                         onClick={() => { onNavigate(it.href.page); setOpen(false); if (it.isDb) api.markNotificacaoLida(it.id); }}
-                        className="flex-1 text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50/80 transition-colors">
+                        className="flex-1 text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors">
                         <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${ic.bg}`}>{ic.i}</span>
                         <span className="min-w-0 flex-1">
-                          <span className={`block text-[13px] font-medium ${isMencao ? 'text-brand-800' : 'text-gray-900'}`}>{it.title}</span>
-                          {it.desc && <span className="block text-xs text-gray-700 truncate">{it.desc}</span>}
-                          <span className="block text-[11px] text-gray-500 mt-0.5">{it.sub}{it.sub && it.time ? ' · ' : ''}{timeAgo(it.time)}</span>
+                          <span className={`block text-[13px] font-medium ${isMencao ? 'text-brand-800 dark:text-brand-400' : 'text-gray-900 dark:text-gray-100'}`}>{it.title}</span>
+                          {it.desc && <span className="block text-xs text-gray-700 dark:text-gray-300 truncate">{it.desc}</span>}
+                          <span className="block text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{it.sub}{it.sub && it.time ? ' · ' : ''}{timeAgo(it.time)}</span>
                         </span>
                       </button>
                       {it.isDb && (
                         <button
                           onClick={() => api.markNotificacaoLida(it.id)}
                           title="Marcar como lida"
-                          className="px-2 text-gray-300 hover:text-brand-500 transition-colors shrink-0">
+                          className="px-2 text-gray-300 dark:text-gray-600 hover:text-brand-500 dark:hover:text-brand-400 transition-colors shrink-0">
                           <IconCheck size={14}/>
                         </button>
                       )}
@@ -174,11 +174,11 @@ const PendChart = ({ items }) => {
   const totals = STAT.map(s => ({ ...s, count: items.filter(i => i.status === s.key).length }));
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-card">
-      <div className="px-5 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card">
+      <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">Pendências ao longo do tempo</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Distribuição por status no período.</p>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pendências ao longo do tempo</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Distribuição por status no período.</p>
         </div>
         <SegTabs value={period} onChange={setPeriod} items={[
           { value: 'diario',  label: 'Diário'  },
@@ -188,15 +188,15 @@ const PendChart = ({ items }) => {
         ]}/>
       </div>
 
-      <div className="px-5 pt-4 pb-2 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+      <div className="px-5 pt-4 pb-2 flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
         {totals.map(t => (
           <span key={t.key} className="inline-flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-sm" style={{ background: t.color }}></span>
-            <span className="font-medium text-gray-700">{t.label}</span>
-            <span className="text-gray-400 tabular-nums">{t.count}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-300">{t.label}</span>
+            <span className="text-gray-400 dark:text-gray-500 tabular-nums">{t.count}</span>
           </span>
         ))}
-        <span className="ml-auto text-gray-400">Total: <span className="font-semibold text-gray-700 tabular-nums">{total}</span></span>
+        <span className="ml-auto text-gray-400 dark:text-gray-500">Total: <span className="font-semibold text-gray-700 dark:text-gray-300 tabular-nums">{total}</span></span>
       </div>
 
       <div className="px-5 pb-5 pt-3">
@@ -206,7 +206,7 @@ const PendChart = ({ items }) => {
             const heightPct = (b.items.length / max) * 100;
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-1.5 group">
-                <div className="relative w-full max-w-[44px] flex flex-col-reverse rounded-md overflow-hidden bg-gray-50/80"
+                <div className="relative w-full max-w-[44px] flex flex-col-reverse rounded-md overflow-hidden bg-gray-50/80 dark:bg-gray-700/50"
                      style={{ height: `${Math.max(2, heightPct)}%`, minHeight: 4 }}>
                   {STAT.map((s, j) => {
                     const c = counts[j];
@@ -215,11 +215,11 @@ const PendChart = ({ items }) => {
                                 style={{ background: s.color, height: `${(c / b.items.length) * 100}%` }}
                                 className="w-full transition-all"></div>;
                   })}
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-gray-700 bg-white px-1.5 py-0.5 rounded border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">
                     {b.items.length}
                   </div>
                 </div>
-                <div className="text-[10px] text-gray-500 tracking-tight whitespace-nowrap">{b.label}</div>
+                <div className="text-[10px] text-gray-500 dark:text-gray-400 tracking-tight whitespace-nowrap">{b.label}</div>
               </div>
             );
           })}
@@ -251,15 +251,15 @@ const AvatarUpload = ({ profile, size = 72 }) => {
       <div className="relative">
         <Avatar name={profile.nome} src={profile.avatar} size={size}/>
         <button onClick={() => ref.current?.click()}
-                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-card flex items-center justify-center text-gray-600 hover:text-brand-700 hover:border-brand-300"
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-card flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-brand-700 dark:hover:text-brand-400 hover:border-brand-300"
                 title="Trocar foto">
           <IconPencil size={12}/>
         </button>
         <input ref={ref} type="file" accept="image/*" className="hidden" onChange={onPick}/>
       </div>
       <div>
-        <div className="text-sm font-medium text-gray-900">Foto de perfil</div>
-        <div className="text-xs text-gray-500 mt-0.5">PNG ou JPG, até 1,5 MB.</div>
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Foto de perfil</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">PNG ou JPG, até 1,5 MB.</div>
         <div className="mt-2 flex items-center gap-2">
           <Btn kind="secondary" size="sm" onClick={() => ref.current?.click()}>Enviar imagem</Btn>
           {profile.avatar && (
@@ -361,29 +361,29 @@ const OnboardingTour = () => {
     <>
       <div style={spotStyle} />
       <div className="ns-pop-in" style={{ position: 'fixed', top: tipTop, left: tipLeft, width: TW, zIndex: 9999 }}>
-        <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #a7f3d0', boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#059669', background: '#ecfdf5', padding: '2px 10px', borderRadius: 999 }}>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border-[1.5px] border-emerald-200 dark:border-emerald-800/80 shadow-[0_8px_32px_rgba(0,0,0,0.18)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full">
               {step + 1} de {TOUR_STEPS.length}
             </span>
             <button onClick={dismiss}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 4, display: 'flex', borderRadius: 6 }}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-1 flex rounded-md transition-colors"
                     title="Pular tour">
               <IconClose size={14} />
             </button>
           </div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 6 }}>{current.title}</div>
-          <div style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.6, marginBottom: 16 }}>{current.desc}</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: isLast ? 'flex-end' : 'space-between', gap: 8 }}>
+          <div className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">{current.title}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">{current.desc}</div>
+          <div className={`flex items-center gap-2 ${isLast ? 'justify-end' : 'justify-between'}`}>
             {!isLast && (
               <button onClick={dismiss}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#9ca3af', padding: '4px 2px' }}>
+                      className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 px-1 py-1 transition-colors">
                 Pular
               </button>
             )}
             <button
               onClick={isLast ? dismiss : () => setStep(s => s + 1)}
-              style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition"
             >
               {isLast ? 'Concluir 🎉' : <><span>Próximo</span><IconChevRight size={13} /></>}
             </button>

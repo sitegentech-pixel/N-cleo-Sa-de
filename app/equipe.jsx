@@ -29,56 +29,56 @@ const Equipe = ({ profile, onOpenPendenciasFor }) => {
           const totalAtivas = c.naoConcluido + c.emAndamento;
           const progress = c.total === 0 ? 0 : Math.round((c.concluido / c.total) * 100);
           return (
-            <div key={u.id} className="bg-white rounded-xl border border-gray-200 shadow-card p-5 hover:border-gray-300 transition">
+            <div key={u.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 hover:border-gray-300 dark:hover:border-gray-600 transition">
               <div className="flex items-start gap-3">
                 <Avatar name={u.nome} size={44}/>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <div className="font-medium text-gray-900 truncate">{u.nome}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{u.nome}</div>
                     {isGestor && (
                       <Badge tone={u.role === 'gestor' ? 'green' : 'gray'}>
                         {u.role === 'gestor' ? 'Gestor' : 'Funcionário'}
                       </Badge>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 truncate">{u.email}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.email}</div>
                 </div>
               </div>
 
               {/* Counts */}
               <div className="mt-4 grid grid-cols-3 gap-2">
-                <div className="rounded-lg bg-rose-50/70 p-2.5">
-                  <div className="text-[10px] font-medium text-rose-700 uppercase tracking-wide">Não concl.</div>
-                  <div className="text-lg font-semibold text-rose-700 tabular-nums mt-0.5">{c.naoConcluido}</div>
+                <div className="rounded-lg bg-rose-50/70 dark:bg-rose-950/40 p-2.5">
+                  <div className="text-[10px] font-medium text-rose-700 dark:text-rose-400 uppercase tracking-wide">Não concl.</div>
+                  <div className="text-lg font-semibold text-rose-700 dark:text-rose-300 tabular-nums mt-0.5">{c.naoConcluido}</div>
                 </div>
-                <div className="rounded-lg bg-amber-50/70 p-2.5">
-                  <div className="text-[10px] font-medium text-amber-800 uppercase tracking-wide">Em andam.</div>
-                  <div className="text-lg font-semibold text-amber-800 tabular-nums mt-0.5">{c.emAndamento}</div>
+                <div className="rounded-lg bg-amber-50/70 dark:bg-amber-950/40 p-2.5">
+                  <div className="text-[10px] font-medium text-amber-800 dark:text-amber-400 uppercase tracking-wide">Em andam.</div>
+                  <div className="text-lg font-semibold text-amber-800 dark:text-amber-300 tabular-nums mt-0.5">{c.emAndamento}</div>
                 </div>
-                <div className="rounded-lg bg-emerald-50/70 p-2.5">
-                  <div className="text-[10px] font-medium text-emerald-700 uppercase tracking-wide">Concluídas</div>
-                  <div className="text-lg font-semibold text-emerald-700 tabular-nums mt-0.5">{c.concluido}</div>
+                <div className="rounded-lg bg-emerald-50/70 dark:bg-emerald-950/40 p-2.5">
+                  <div className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">Concluídas</div>
+                  <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums mt-0.5">{c.concluido}</div>
                 </div>
               </div>
 
               {/* Progress */}
               <div className="mt-4">
-                <div className="flex items-center justify-between text-[11px] text-gray-500 mb-1">
+                <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 mb-1">
                   <span>Progresso</span>
-                  <span className="tabular-nums font-medium text-gray-700">{progress}%</span>
+                  <span className="tabular-nums font-medium text-gray-700 dark:text-gray-300">{progress}%</span>
                 </div>
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div className="h-full bg-brand-500 rounded-full transition-all"
                        style={{ width: `${progress}%` }} />
                 </div>
               </div>
 
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-gray-500">{totalAtivas} {totalAtivas === 1 ? 'tarefa ativa' : 'tarefas ativas'}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{totalAtivas} {totalAtivas === 1 ? 'tarefa ativa' : 'tarefas ativas'}</span>
                 {isGestor && (
                   <button
                     onClick={() => onOpenPendenciasFor(u.id)}
-                    className="text-xs font-medium text-brand-700 hover:text-brand-800 inline-flex items-center gap-1">
+                    className="text-xs font-medium text-brand-700 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-300 inline-flex items-center gap-1">
                     Ver pendências <IconChevRight size={12}/>
                   </button>
                 )}

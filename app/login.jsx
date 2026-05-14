@@ -76,12 +76,12 @@ const Login = ({ onLogin }) => {
           <span className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-600/30">
             <IconLogo size={20} />
           </span>
-          <span className="text-[22px] font-semibold tracking-tight text-gray-900">Núcleo Saúde</span>
+          <span className="text-[22px] font-semibold tracking-tight text-gray-900 dark:text-white">Núcleo Saúde</span>
         </div>
 
-        <div className="bg-white/90 backdrop-blur rounded-2xl border border-white/60 shadow-pop p-7">
-          <h1 className="text-lg font-semibold text-gray-900 tracking-tight">Bem-vindo de volta</h1>
-          <p className="text-sm text-gray-500 mt-1">Acesse o painel da cooperativa.</p>
+        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl border border-white/60 dark:border-gray-700/60 shadow-pop p-7">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Bem-vindo de volta</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Acesse o painel da cooperativa.</p>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
             <div>
@@ -91,8 +91,8 @@ const Login = ({ onLogin }) => {
             </div>
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-gray-700">Senha</label>
-                <button type="button" onClick={reset} className="text-xs font-medium text-brand-700 hover:text-brand-800">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                <button type="button" onClick={reset} className="text-xs font-medium text-brand-700 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-300">
                   Esqueci minha senha
                 </button>
               </div>
@@ -104,8 +104,8 @@ const Login = ({ onLogin }) => {
               {loading ? 'Entrando...' : 'Entrar'}
             </Btn>
 
-            {error && <p className="text-xs text-rose-600 text-center">{error}</p>}
-            {info && <p className="text-xs text-emerald-700 text-center">{info}</p>}
+            {error && <p className="text-xs text-rose-600 dark:text-rose-400 text-center">{error}</p>}
+            {info && <p className="text-xs text-emerald-700 dark:text-emerald-400 text-center">{info}</p>}
           </form>
         </div>
 
