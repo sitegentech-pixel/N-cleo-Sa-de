@@ -110,56 +110,83 @@ const NotificationBell = ({ profile, onNavigate }) => {
 // ---------- Pendências chart ----------
 // Group pendencias by period; show stacked bars by status.
 const groupBy = (list, period) => {
-  const buckets = new Map();
+  const buckets = [];
   const now = new Date();
-  let n, key;
+  now.setHours(0, 0, 0, 0);
+
   if (period === 'diario') {
-    n = 7;
-    for (let i = n - 1; i >= 0; i--) {
-      const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate() - i);
-      buckets.set(d.toISOString().slice(0,10), { label: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.',''), items: [] });
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      buckets.push({
+        key,
+        label: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
+        items: []
+      });
     }
-    key = (iso) => iso ? iso.slice(0,10) : null;
   } else if (period === 'semanal') {
-    n = 8;
-    for (let i = n - 1; i >= 0; i--) {
-      const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate() - i*7);
-      // week-of-month-ish label
-      const wk = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`;
-      buckets.set(`w-${i}`, { label: `S ${wk}`, weekStart: d.getTime(), items: [] });
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i * 7);
+      buckets.push({
+        key: `w-${i}`,
+        label: `S ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`,
+        start: d.getTime(),
+        items: []
+      });
     }
-    key = (iso) => {
-      if (!iso) return null;
-      const t = new Date(iso).getTime();
-      let bestKey = null, bestStart = -Infinity;
-      for (const [k, v] of buckets) {
-        if (v.weekStart <= t && v.weekStart > bestStart) { bestStart = v.weekStart; bestKey = k; }
-      }
-      return bestKey;
-    };
   } else if (period === 'mensal') {
-    n = 6;
-    for (let i = n - 1; i >= 0; i--) {
+    for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const k = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
-      buckets.set(k, { label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.',''), items: [] });
+      buckets.push({
+        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+        label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
+        items: []
+      });
     }
-    key = (iso) => iso ? iso.slice(0,7) : null;
   } else { // anual
-    n = 4;
-    for (let i = n - 1; i >= 0; i--) {
+    for (let i = 3; i >= 0; i--) {
       const y = now.getFullYear() - i;
-      buckets.set(`${y}`, { label: `${y}`, items: [] });
+      buckets.push({
+        key: `${y}`,
+        label: `${y}`,
+        items: []
+      });
     }
-    key = (iso) => iso ? iso.slice(0,4) : null;
   }
+
+  const getBucketKey = (iso) => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+
+    if (period === 'diario') {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    if (period === 'semanal') {
+      const t = d.getTime();
+      let bestIdx = -1;
+      for (let i = 0; i < buckets.length; i++) {
+        if (buckets[i].start <= t) bestIdx = i;
+      }
+      return bestIdx !== -1 ? buckets[bestIdx].key : null;
+    }
+    if (period === 'mensal') {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+    return `${d.getFullYear()}`;
+  };
+
   for (const item of list) {
     const isoDate = item.created_at || item.updated_at || item.criado_em;
-    if (!isoDate) continue;
-    const k = key(isoDate);
-    if (k && buckets.has(k)) buckets.get(k).items.push(item);
+    const k = getBucketKey(isoDate);
+    if (k) {
+      const b = buckets.find(x => x.key === k);
+      if (b) b.items.push(item);
+    }
   }
-  return [...buckets.values()];
+  return buckets;
 };
 
 const PendChart = ({ items }) => {
