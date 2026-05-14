@@ -21,11 +21,67 @@ const CountCard = ({ label, value, accent, sub, icon }) => (
   </div>
 );
 
+const getWeekRange = () => {
+  const now = new Date();
+  const day = now.getDay();
+  const diffToMon = day === 0 ? -6 : 1 - day;
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diffToMon);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const fmt = (d) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  return `${fmt(mon)} a ${fmt(sun)}`;
+};
+
+const MetaModal = ({ open, onClose, form, setForm, onSubmit, isEdit }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white max-w-sm w-full rounded-2xl shadow-pop p-6" onClick={e => e.stopPropagation()}>
+        <h2 className="text-base font-semibold text-gray-900">Meta da Equipe</h2>
+        <p className="text-xs text-gray-500 mt-0.5 mb-5">Semana de {getWeekRange()}</p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Pendências a concluir</label>
+            <input
+              type="number" min="1" max="99"
+              value={form.pends}
+              onChange={e => setForm(f => ({ ...f, pends: e.target.value }))}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              placeholder="Ex: 10"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Demandas a concluir</label>
+            <input
+              type="number" min="1" max="99"
+              value={form.dems}
+              onChange={e => setForm(f => ({ ...f, dems: e.target.value }))}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              placeholder="Ex: 5"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <Btn kind="ghost" className="flex-1" onClick={onClose}>Cancelar</Btn>
+          <Btn kind="primary" className="flex-1" onClick={onSubmit}>
+            {isEdit ? 'Salvar' : 'Definir Meta'}
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = ({ profile, onNavigate }) => {
   const store = useStore();
 
   const isGestor = profile.role === 'gestor';
   const [scope, setScope] = React.useState('pessoal'); // pessoal | equipe
+  const [metaModalOpen, setMetaModalOpen] = React.useState(false);
+  const [metaForm, setMetaForm] = React.useState({ pends: '', dems: '' });
 
   const useTeam = isGestor && scope === 'equipe';
   const visiblePend = useTeam
@@ -63,6 +119,26 @@ const Dashboard = ({ profile, onNavigate }) => {
     const now = new Date();
     return new Date(m.data_inicio) <= now && new Date(m.data_fim) >= now;
   }) : null;
+
+  const handleMetaOpen = () => {
+    setMetaForm({
+      pends: currentGoal?.qtd_pendencias || '',
+      dems:  currentGoal?.qtd_demandas  || '',
+    });
+    setMetaModalOpen(true);
+  };
+
+  const handleMetaSubmit = () => {
+    const p = Number(metaForm.pends);
+    const d = Number(metaForm.dems);
+    if (!p || !d) return;
+    if (currentGoal) {
+      window.api.updateMeta(currentGoal.id, p, d);
+    } else {
+      window.api.createMeta(profile.id, p, d);
+    }
+    setMetaModalOpen(false);
+  };
 
   const weekStats = React.useMemo(() => {
     const now = new Date();
@@ -143,23 +219,13 @@ const Dashboard = ({ profile, onNavigate }) => {
                   <div className="h-full bg-emerald-500 transition-all" style={{ width: `${Math.min(100, (weekStats.conclusoes / (currentGoal.qtd_pendencias + currentGoal.qtd_demandas)) * 100)}%` }} />
                 </div>
                 {profile.role === 'gestor' && (
-                  <Btn size="sm" kind="ghost" className="w-full text-xs mt-3" onClick={() => {
-                    const pends = prompt('Nova meta de pendências?', currentGoal.qtd_pendencias);
-                    if (pends === null) return;
-                    const dems = prompt('Nova meta de demandas?', currentGoal.qtd_demandas);
-                    if (pends !== null && dems !== null) window.api.updateMeta(currentGoal.id, Number(pends), Number(dems));
-                  }}>Editar Meta</Btn>
+                  <Btn size="sm" kind="ghost" className="w-full text-xs mt-3" onClick={handleMetaOpen}>Editar Meta</Btn>
                 )}
               </div>
             ) : (
               <div className="mt-4">
                 {profile.role === 'gestor' ? (
-                  <Btn size="sm" kind="secondary" className="w-full text-xs" onClick={() => {
-                    const pends = prompt('Meta de pendências concluídas para a semana?');
-                    if (!pends) return;
-                    const dems = prompt('Meta de demandas concluídas para a semana?');
-                    if (pends && dems) window.api.createMeta(profile.id, Number(pends), Number(dems));
-                  }}>Definir Meta da Equipe</Btn>
+                  <Btn size="sm" kind="secondary" className="w-full text-xs" onClick={handleMetaOpen}>Definir Meta da Equipe</Btn>
                 ) : (
                   <div className="text-center text-xs text-gray-400 py-2">O gestor ainda não definiu a meta da semana.</div>
                 )}
@@ -307,6 +373,15 @@ const Dashboard = ({ profile, onNavigate }) => {
               </ul>}
         </div>
       </div>
+
+      <MetaModal
+        open={metaModalOpen}
+        onClose={() => setMetaModalOpen(false)}
+        form={metaForm}
+        setForm={setMetaForm}
+        onSubmit={handleMetaSubmit}
+        isEdit={!!currentGoal}
+      />
     </div>
   );
 };
