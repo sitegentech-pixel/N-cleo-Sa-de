@@ -112,14 +112,14 @@ const NotificationBell = ({ profile, onNavigate }) => {
 const groupBy = (list, period) => {
   const buckets = new Map();
   const now = new Date();
-  let n, fmt, key;
+  let n, key;
   if (period === 'diario') {
     n = 7;
     for (let i = n - 1; i >= 0; i--) {
       const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate() - i);
       buckets.set(d.toISOString().slice(0,10), { label: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.',''), items: [] });
     }
-    key = (iso) => iso.slice(0,10);
+    key = (iso) => iso ? iso.slice(0,10) : null;
   } else if (period === 'semanal') {
     n = 8;
     for (let i = n - 1; i >= 0; i--) {
@@ -129,6 +129,7 @@ const groupBy = (list, period) => {
       buckets.set(`w-${i}`, { label: `S ${wk}`, weekStart: d.getTime(), items: [] });
     }
     key = (iso) => {
+      if (!iso) return null;
       const t = new Date(iso).getTime();
       let bestKey = null, bestStart = -Infinity;
       for (const [k, v] of buckets) {
@@ -143,17 +144,19 @@ const groupBy = (list, period) => {
       const k = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
       buckets.set(k, { label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.',''), items: [] });
     }
-    key = (iso) => iso.slice(0,7);
+    key = (iso) => iso ? iso.slice(0,7) : null;
   } else { // anual
     n = 4;
     for (let i = n - 1; i >= 0; i--) {
       const y = now.getFullYear() - i;
       buckets.set(`${y}`, { label: `${y}`, items: [] });
     }
-    key = (iso) => iso.slice(0,4);
+    key = (iso) => iso ? iso.slice(0,4) : null;
   }
   for (const item of list) {
-    const k = key(item.created_at || item.updated_at);
+    const isoDate = item.created_at || item.updated_at || item.criado_em;
+    if (!isoDate) continue;
+    const k = key(isoDate);
     if (k && buckets.has(k)) buckets.get(k).items.push(item);
   }
   return [...buckets.values()];
