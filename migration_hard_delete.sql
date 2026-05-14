@@ -18,9 +18,6 @@ BEGIN
   UPDATE public.demandas SET responsavel_id = NULL WHERE responsavel_id = target_user_id;
   UPDATE public.demandas SET criado_por_id  = NULL WHERE criado_por_id  = target_user_id;
 
-  -- Nullar referências em demandas_historico
-  UPDATE public.demandas_historico SET autor_id = NULL WHERE autor_id = target_user_id;
-
   -- Nullar referências em equipe_metas (gestor_id NOT NULL — deletar a meta em vez de nullar)
   DELETE FROM public.equipe_metas WHERE gestor_id = target_user_id;
 

@@ -23,6 +23,7 @@ const STATIC_FILES = [
   '/app/equipe.jsx',
   '/app/feedback.jsx',
   '/app/usuarios.jsx',
+  '/app/perfil.jsx',
   '/app/main.jsx',
   '/ico.jpg',
   '/og.jpg',

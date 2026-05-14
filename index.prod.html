@@ -31,18 +31,8 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Dark mode: apply class before render to prevent FOUC -->
-  <script>
-    (function(){
-      var v = localStorage.getItem('ns-dark');
-      var mq = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (v === 'true' || (v === null && mq)) document.documentElement.classList.add('dark');
-    })();
-  </script>
-
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -71,9 +61,6 @@
   <!-- React 18 -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-  <!-- Babel standalone (JSX in browser) -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <!-- Supabase JS v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -105,54 +92,27 @@
     /* ---- misc ---- */
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
-
-    /* ---- dark mode overrides ---- */
-    .dark .ns-login-bg { background: #0f172a; }
-    .ns-tour-tip {
-      background: #fff; border-radius: 16px;
-      border: 1.5px solid #a7f3d0;
-      box-shadow: 0 8px 32px rgba(0,0,0,.18); padding: 20px;
-    }
-    .dark .ns-tour-tip {
-      background: #1f2937; border-color: #065f46;
-    }
-    .dark .ns-tour-badge { background: #064e3b; color: #34d399; }
-    .ns-tour-badge { background: #ecfdf5; color: #059669; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
-    .ns-tour-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 6px; }
-    .dark .ns-tour-title { color: #f3f4f6; }
-    .ns-tour-desc { font-size: 12px; color: #6b7280; line-height: 1.6; margin-bottom: 16px; }
-    .dark .ns-tour-desc { color: #9ca3af; }
-    .ns-tour-skip { background: none; border: none; cursor: pointer; font-size: 12px; color: #9ca3af; padding: 4px 2px; }
-    .ns-tour-next { background: #059669; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-
-    /* ---- page transition ---- */
-    main { transition: opacity 120ms ease; }
-
-    /* ---- print ---- */
-    @media print {
-      .sidebar, .topbar, .no-print { display: none !important; }
-    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- App scripts — order matters: each file exports to window before the next loads -->
-  <script type="text/babel" src="./app/icons.jsx"></script>
-  <script type="text/babel" src="./app/ui.jsx"></script>
-  <script type="text/babel" src="./app/tweaks-panel.jsx"></script>
-  <script type="text/babel" src="./app/data.jsx"></script>
-  <script type="text/babel" src="./app/extras.jsx"></script>
-  <script type="text/babel" src="./app/sidebar.jsx"></script>
-  <script type="text/babel" src="./app/login.jsx"></script>
-  <script type="text/babel" src="./app/dashboard.jsx"></script>
-  <script type="text/babel" src="./app/pendencias.jsx"></script>
-  <script type="text/babel" src="./app/demandas.jsx"></script>
-  <script type="text/babel" src="./app/equipe.jsx"></script>
-  <script type="text/babel" src="./app/feedback.jsx"></script>
-  <script type="text/babel" src="./app/usuarios.jsx"></script>
-  <script type="text/babel" src="./app/perfil.jsx"></script>
-  <script type="text/babel" src="./app/main.jsx"></script>
+  <!-- App scripts — compiled JS (no Babel runtime) -->
+  <script src="./dist/app/icons.js"></script>
+  <script src="./dist/app/ui.js"></script>
+  <script src="./dist/app/tweaks-panel.js"></script>
+  <script src="./dist/app/data.js"></script>
+  <script src="./dist/app/extras.js"></script>
+  <script src="./dist/app/sidebar.js"></script>
+  <script src="./dist/app/login.js"></script>
+  <script src="./dist/app/dashboard.js"></script>
+  <script src="./dist/app/pendencias.js"></script>
+  <script src="./dist/app/demandas.js"></script>
+  <script src="./dist/app/equipe.js"></script>
+  <script src="./dist/app/feedback.js"></script>
+  <script src="./dist/app/usuarios.js"></script>
+  <script src="./dist/app/perfil.js"></script>
+  <script src="./dist/app/main.js"></script>
 
   <script>
     if ('serviceWorker' in navigator) {

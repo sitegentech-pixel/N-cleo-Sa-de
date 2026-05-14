@@ -1,6 +1,19 @@
 // Pendências — Kanban with native HTML5 drag and drop, plus modal CRUD.
+// Mobile (<768px): snap-scroll columns + move buttons replace drag.
 
-const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd, dragging }) => {
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 768);
+  React.useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isMobile;
+};
+
+const STATUS_ORDER = ['nao-concluido', 'em-andamento', 'concluido'];
+
+const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd, dragging, isMobile, colIndex, onMove }) => {
   const store = useStore();
   const overdue = isOverdue(p.prazo, p.status, 'concluido');
   const user = store.profiles.find(x => x.id === p.responsavel_id);
@@ -15,7 +28,9 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
                   ${dragging ? 'ns-dragging' : ''}`}
     >
       <div className="flex items-start gap-2">
-        <span className="text-gray-300 group-hover:text-gray-400 mt-0.5 shrink-0"><IconDrag size={14}/></span>
+        <span className={isMobile ? 'hidden' : 'text-gray-300 group-hover:text-gray-400 mt-0.5 shrink-0'}>
+          <IconDrag size={14}/>
+        </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="text-sm font-semibold text-gray-900 leading-snug">{p.titulo}</div>
@@ -34,30 +49,51 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
           </div>
         </div>
       </div>
-      <div className="mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => onEdit(p)}
-                className="ml-auto p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100"
-                title="Editar">
-          <IconPencil size={14}/>
-        </button>
-        {canDelete && (
-          <button onClick={() => onDelete(p)}
-                  className="p-1.5 rounded-md text-gray-400 hover:text-rose-600 hover:bg-rose-50"
-                  title="Excluir">
-            <IconTrash size={14}/>
+      {isMobile ? (
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            onClick={() => onMove(p, -1)}
+            disabled={colIndex === 0}
+            className="flex-1 bg-gray-100 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium hover:opacity-80 transition-opacity active:scale-95 disabled:opacity-40"
+          >
+            ← Voltar
           </button>
-        )}
-      </div>
+          <button
+            onClick={() => onMove(p, 1)}
+            disabled={colIndex === STATUS_ORDER.length - 1}
+            className="flex-1 bg-brand-600 text-white rounded-lg px-3 py-1.5 text-xs font-medium hover:opacity-80 transition-opacity active:scale-95 disabled:opacity-40"
+          >
+            Avançar →
+          </button>
+        </div>
+      ) : (
+        <div className="mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={() => onEdit(p)}
+                  className="ml-auto p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                  title="Editar">
+            <IconPencil size={14}/>
+          </button>
+          {canDelete && (
+            <button onClick={() => onDelete(p)}
+                    className="p-1.5 rounded-md text-gray-400 hover:text-rose-600 hover:bg-rose-50"
+                    title="Excluir">
+              <IconTrash size={14}/>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-const KanbanColumn = ({ status, label, headerColor, headerDot, items, onDropTo, onDragOver, isOver, ...handlers }) => (
+const KanbanColumn = ({ status, label, headerColor, headerDot, items, onDropTo, onDragOver, isOver, isMobile, colIndex, onMove, ...handlers }) => (
   <div
     onDragOver={(e) => { e.preventDefault(); onDragOver(status); }}
     onDragLeave={() => onDragOver(null)}
     onDrop={(e) => { e.preventDefault(); onDropTo(status); }}
-    className={`flex flex-col bg-gray-50/60 border border-gray-200 rounded-2xl min-h-[200px] ${isOver ? 'ns-drag-over' : ''}`}
+    className={`flex flex-col bg-gray-50/60 border border-gray-200 rounded-2xl min-h-[200px]
+      ${isMobile ? 'min-w-[85vw] snap-start' : ''}
+      ${isOver ? 'ns-drag-over' : ''}`}
   >
     <div className="px-4 pt-4 pb-3 flex items-center gap-2.5">
       <span className={`w-2.5 h-2.5 rounded-full ${headerDot}`}></span>
@@ -67,10 +103,10 @@ const KanbanColumn = ({ status, label, headerColor, headerDot, items, onDropTo, 
     <div className="px-3 pb-3 space-y-2 flex-1 overflow-y-auto">
       {items.length === 0
         ? <div className="text-center text-xs text-gray-400 py-8 border border-dashed border-gray-200 rounded-xl mx-1">
-            Solte cards aqui
+            {isMobile ? 'Vazio' : 'Solte cards aqui'}
           </div>
         : items.map(p => (
-            <PendenciaCard key={p.id} p={p} {...handlers}/>
+            <PendenciaCard key={p.id} p={p} isMobile={isMobile} colIndex={colIndex} onMove={onMove} {...handlers}/>
           ))}
     </div>
   </div>
@@ -194,11 +230,14 @@ const PendenciaModal = ({ open, onClose, editing, profile, onSaved }) => {
 const Pendencias = ({ profile, filterByResponsavel }) => {
   const store = useStore();
   const isGestor = profile.role === 'gestor';
+  const isMobile = useIsMobile();
 
   const [responsavelFilter, setResponsavelFilter] = React.useState(filterByResponsavel || 'todos');
   const [modal, setModal] = React.useState({ open: false, editing: null });
   const [draggingId, setDraggingId] = React.useState(null);
   const [dragOver, setDragOver] = React.useState(null);
+  const [activeCol, setActiveCol] = React.useState(0);
+  const scrollRef = React.useRef(null);
 
   React.useEffect(() => { setResponsavelFilter(filterByResponsavel || 'todos'); }, [filterByResponsavel]);
 
@@ -235,10 +274,30 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
     }
   };
 
+  const onMoveCard = (p, direction) => {
+    const idx = STATUS_ORDER.indexOf(p.status);
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= STATUS_ORDER.length) return;
+    const newStatus = STATUS_ORDER[newIdx];
+    const prevStatus = p.status;
+    api.updatePendencia(p.id, { status: newStatus });
+    toast(`Movido para "${cols.find(c => c.status === newStatus).label}".`);
+    if (newStatus === 'concluido' && prevStatus !== 'concluido') {
+      celebrate({ message: 'Pendência concluída!' });
+    }
+  };
+
   const onDelete = (p) => {
     if (!confirmAction(`Excluir a pendência "${p.titulo}"?`)) return;
     api.deletePendencia(p.id);
     toast('Pendência excluída.', 'info');
+  };
+
+  const onScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth } = scrollRef.current;
+    const segmentWidth = scrollWidth / cols.length;
+    setActiveCol(Math.min(Math.round(scrollLeft / segmentWidth), cols.length - 1));
   };
 
   return (
@@ -263,8 +322,14 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {cols.map(c => (
+      <div
+        ref={isMobile ? scrollRef : null}
+        onScroll={isMobile ? onScroll : undefined}
+        className={isMobile
+          ? 'flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4'
+          : 'grid grid-cols-3 gap-4'}
+      >
+        {cols.map((c, i) => (
           <KanbanColumn
             key={c.status}
             status={c.status}
@@ -281,9 +346,23 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
             onDragStart={setDraggingId}
             onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
             dragging={false}
+            isMobile={isMobile}
+            colIndex={i}
+            onMove={onMoveCard}
           />
         ))}
       </div>
+
+      {isMobile && (
+        <div className="flex items-center justify-center gap-2 mt-3">
+          {cols.map((_, i) => (
+            <span
+              key={i}
+              className={`w-2 h-2 rounded-full transition-colors ${i === activeCol ? 'bg-brand-600' : 'bg-gray-300'}`}
+            />
+          ))}
+        </div>
+      )}
 
       <PendenciaModal
         open={modal.open}

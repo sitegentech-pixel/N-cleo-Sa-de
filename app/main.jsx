@@ -27,6 +27,7 @@ const PAGE_TITLES = {
   equipe:     'Equipe',
   feedback:   'Feedback',
   usuarios:   'Usuários',
+  perfil:     'Meu Perfil',
 };
 
 const App = () => {
@@ -62,6 +63,7 @@ const App = () => {
   const [page, setPage] = React.useState('dashboard');
   const [pendFilter, setPendFilter] = React.useState(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [transitioning, setTransitioning] = React.useState(false);
 
   // Counts for sidebar badges (role-aware)
   const sidebarCounts = React.useMemo(() => {
@@ -83,7 +85,7 @@ const App = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f7f8fa]">
+      <div className="min-h-screen flex items-center justify-center bg-[#f7f8fa] dark:bg-gray-900">
         <div className="flex flex-col items-center gap-3">
           <span className="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-600/30">
             <IconLogo size={22} />
@@ -104,8 +106,12 @@ const App = () => {
   }
 
   const handleNavigate = (id) => {
-    if (id !== 'pendencias') setPendFilter(null);
-    setPage(id);
+    setTransitioning(true);
+    setTimeout(() => {
+      if (id !== 'pendencias') setPendFilter(null);
+      setPage(id);
+      setTransitioning(false);
+    }, 120);
   };
 
   const renderPage = () => {
@@ -118,6 +124,7 @@ const App = () => {
       case 'usuarios':
         if (profile.role !== 'gestor') return <Dashboard profile={profile} onNavigate={handleNavigate}/>;
         return <Usuarios profile={profile} />;
+      case 'perfil': return <Perfil profile={profile} onBack={() => setPage('dashboard')} />;
       default: return null;
     }
   };
@@ -125,7 +132,7 @@ const App = () => {
   return (
     <>
     <OfflineBanner />
-    <div className="flex min-h-screen bg-[#f7f8fa]">
+    <div className="flex min-h-screen bg-[#f7f8fa] dark:bg-gray-900">
       <Sidebar
         profile={profile}
         page={page}
@@ -143,7 +150,7 @@ const App = () => {
           profile={profile}
           onNavigate={handleNavigate}
         />
-        <main className="flex-1 min-w-0">
+        <main className={`flex-1 min-w-0 transition-opacity duration-150 ${transitioning ? 'opacity-0' : 'opacity-100'}`}>
           {renderPage()}
         </main>
       </div>
@@ -159,6 +166,9 @@ const App = () => {
             <p className="text-[11px] text-gray-500 mt-2">Sincroniza os dados com o Supabase.</p>
             <TweakButton onClick={() => { api.clearCache(); window.location.reload(); }}>Limpar Cache Local</TweakButton>
             <p className="text-[11px] text-gray-500 mt-2">Remove dados em cache (offline). Recarrega a página.</p>
+          </TweakSection>
+          <TweakSection title="Onboarding">
+            <TweakButton label="Iniciar Tour" onClick={() => window.dispatchEvent(new CustomEvent('ns-start-tour'))} />
           </TweakSection>
       </TweaksPanel>
     </div>

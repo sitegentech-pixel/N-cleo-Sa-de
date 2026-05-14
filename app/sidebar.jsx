@@ -22,9 +22,10 @@ const SidebarAvatarPicker = ({ profile }) => {
   );
 };
 
-const NavItem = ({ active, icon, label, onClick, badge }) => (
+const NavItem = ({ active, icon, label, onClick, badge, tourId }) => (
   <button
     onClick={onClick}
+    data-tour={tourId}
     className={`w-full group flex items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors
       ${active
         ? 'bg-brand-700/90 text-white shadow-inner shadow-black/10'
@@ -42,9 +43,9 @@ const NavItem = ({ active, icon, label, onClick, badge }) => (
 const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobile, counts }) => {
   const isGestor = profile.role === 'gestor';
   const items = [
-    { id: 'dashboard',   label: 'Dashboard',         icon: <IconHome size={18} /> },
-    { id: 'pendencias',  label: 'Minhas Pendências', icon: <IconCheckSq size={18} />, badge: counts?.pendOpen },
-    { id: 'demandas',    label: 'Demandas',          icon: <IconInbox size={18} />,    badge: counts?.demOpen },
+    { id: 'dashboard',   label: 'Dashboard',         icon: <IconHome size={18} />,    tourId: 'dashboard'  },
+    { id: 'pendencias',  label: 'Minhas Pendências', icon: <IconCheckSq size={18} />, badge: counts?.pendOpen, tourId: 'pendencias' },
+    { id: 'demandas',    label: 'Demandas',          icon: <IconInbox size={18} />,   badge: counts?.demOpen,  tourId: 'demandas'   },
     { id: 'equipe',      label: 'Equipe',            icon: <IconUsers size={18} /> },
     { id: 'feedback',    label: 'Feedback',          icon: <IconSpark size={18} /> },
     ...(isGestor ? [{ id: 'usuarios', label: 'Usuários', icon: <IconShield size={18} /> }] : []),
@@ -85,7 +86,7 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
         })()}
 
         {/* Nav */}
-        <nav className="px-3 py-2 space-y-0.5 flex-1 overflow-y-auto">
+        <nav className="px-3 py-2 space-y-0.5 flex-1 overflow-y-auto" data-tour="sidebar">
           <div className="text-[10px] uppercase tracking-wider text-gray-500 px-3 pt-3 pb-1.5">Trabalho</div>
           {items.map(it => (
             <NavItem
@@ -94,6 +95,7 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
               icon={it.icon}
               label={it.label}
               badge={it.badge}
+              tourId={it.tourId}
               onClick={() => { onNavigate(it.id); onCloseMobile?.(); }}
             />
           ))}
@@ -109,6 +111,12 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
                 <div className="text-[11px] text-gray-400">Gestor</div>
               )}
             </div>
+            <button onClick={() => onNavigate('perfil')}
+                    className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"
+                    data-tour="perfil"
+                    title="Meu Perfil">
+              <IconUser size={16} />
+            </button>
             <button onClick={onLogout}
                     className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"
                     title="Sair">
@@ -143,28 +151,58 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
   );
 };
 
-const TopBar = ({ onOpenMobile, title, profile, onNavigate }) => (
-  <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-200 h-14 px-3 sm:px-5 flex items-center gap-3">
-    <button onClick={onOpenMobile} className="lg:hidden p-2 -ml-1 rounded-lg text-gray-700 hover:bg-gray-100">
-      <IconMenu size={20} />
-    </button>
-    <div className="font-semibold text-gray-900 truncate text-[15px]">{title}</div>
-    <div className="ml-auto flex items-center gap-2">
-      <button onClick={() => window.dispatchEvent(new CustomEvent('ns-open-search'))} className="hidden sm:flex items-center gap-2 px-3 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors text-xs border border-gray-200">
-        <IconSearch size={14}/>
-        <span>Buscar...</span>
-        <kbd className="px-1.5 py-0.5 text-[10px] bg-white rounded border border-gray-300 shadow-sm">/</kbd>
+const TopBar = ({ onOpenMobile, title, profile, onNavigate }) => {
+  const [isDark, setIsDark] = React.useState(() => document.documentElement.classList.contains('dark'));
+
+  const toggleDark = () => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('ns-dark', String(next));
+  };
+
+  return (
+    <header className="sticky top-0 z-20 bg-white/90 dark:bg-gray-900/95 backdrop-blur border-b border-gray-200 dark:border-gray-700 h-14 px-3 sm:px-5 flex items-center gap-3 topbar">
+      <button onClick={onOpenMobile} className="lg:hidden p-2 -ml-1 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <IconMenu size={20} />
       </button>
-      <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block"></div>
-      {profile && <NotificationBell profile={profile} onNavigate={onNavigate}/>}
-      {profile && (
-        <div className="hidden sm:flex items-center gap-2 pl-2 ml-1 border-l border-gray-200 h-8">
-          <Avatar name={profile.nome} src={profile.avatar} size={28}/>
-          <span className="text-xs font-medium text-gray-700 truncate max-w-[140px]">{profile.nome.split(' ')[0]}</span>
-        </div>
-      )}
-    </div>
-  </header>
-);
+      <div className="font-semibold text-gray-900 dark:text-gray-100 truncate text-[15px]">{title}</div>
+      <div className="ml-auto flex items-center gap-2">
+        <button onClick={() => window.dispatchEvent(new CustomEvent('ns-open-search'))}
+                className="hidden sm:flex items-center gap-2 px-3 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs border border-gray-200 dark:border-gray-700">
+          <IconSearch size={14}/>
+          <span>Buscar...</span>
+          <kbd className="px-1.5 py-0.5 text-[10px] bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 shadow-sm dark:text-gray-400">/</kbd>
+        </button>
+        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block"></div>
+
+        {/* Dark mode toggle */}
+        <button
+          onClick={toggleDark}
+          className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          title={isDark ? 'Modo claro' : 'Modo escuro'}
+        >
+          {isDark ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          )}
+        </button>
+
+        {profile && <NotificationBell profile={profile} onNavigate={onNavigate}/>}
+        {profile && (
+          <div className="hidden sm:flex items-center gap-2 pl-2 ml-1 border-l border-gray-200 dark:border-gray-700 h-8">
+            <Avatar name={profile.nome} src={profile.avatar} size={28}/>
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate max-w-[140px]">{profile.nome.split(' ')[0]}</span>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
 
 Object.assign(window, { Sidebar, TopBar });

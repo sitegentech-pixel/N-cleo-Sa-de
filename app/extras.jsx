@@ -41,7 +41,7 @@ const NotificationBell = ({ profile, onNavigate }) => {
   };
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={ref} data-tour="notif">
       <button onClick={() => { setOpen(o => !o); if (!open) markAllSeen(); }}
               className="relative p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               title="Notificações">
@@ -273,7 +273,128 @@ const AvatarUpload = ({ profile, size = 72 }) => {
   );
 };
 
-Object.assign(window, { NotificationBell, PendChart, AvatarUpload });
+// ---------- OnboardingTour ----------
+const TOUR_STEPS = [
+  { target: '[data-tour="sidebar"]',    title: 'Navegação',         desc: 'Use o menu lateral para acessar todas as telas do sistema.' },
+  { target: '[data-tour="dashboard"]',  title: 'Dashboard',         desc: 'Veja seus indicadores, metas e atividade recente em um só lugar.' },
+  { target: '[data-tour="pendencias"]', title: 'Pendências',        desc: 'Organize suas tarefas em colunas: A fazer → Em andamento → Concluído. Arraste para mover.' },
+  { target: '[data-tour="demandas"]',   title: 'Demandas',          desc: 'Demandas são enviadas pelo gestor. Atualize o status conforme avança.' },
+  { target: '[data-tour="notif"]',      title: 'Notificações',      desc: 'Alertas de prazos vencidos, demandas novas e menções aparecem aqui.' },
+  { target: '[data-tour="perfil"]',     title: 'Seu Perfil',        desc: 'Atualize foto e dados. Tour concluído — bom trabalho! 🎉' },
+];
+
+const OnboardingTour = () => {
+  const [step, setStep] = React.useState(null);
+  const [rect, setRect] = React.useState(null);
+
+  const dismiss = React.useCallback(() => {
+    localStorage.setItem('ns-tour-done', '1');
+    setStep(null);
+    setRect(null);
+  }, []);
+
+  React.useEffect(() => {
+    if (!localStorage.getItem('ns-tour-done')) {
+      const t = setTimeout(() => setStep(0), 900);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const handler = () => { localStorage.removeItem('ns-tour-done'); setStep(0); };
+    window.addEventListener('ns-start-tour', handler);
+    return () => window.removeEventListener('ns-start-tour', handler);
+  }, []);
+
+  React.useEffect(() => {
+    if (step === null) return;
+    const update = () => {
+      const el = document.querySelector(TOUR_STEPS[step].target);
+      setRect(el ? el.getBoundingClientRect() : null);
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [step]);
+
+  if (step === null) return null;
+
+  const current = TOUR_STEPS[step];
+  const isLast  = step === TOUR_STEPS.length - 1;
+  const PAD     = 8;
+  const TW = 288, TH = 168;
+
+  let tipTop, tipLeft;
+  if (rect && rect.width > 0) {
+    const below = rect.bottom + PAD + 8;
+    const above = rect.top - TH - PAD - 8;
+    const useAbove = below + TH > window.innerHeight - 16;
+    tipTop  = useAbove ? Math.max(16, above) : Math.min(window.innerHeight - TH - 16, below);
+    tipLeft = Math.min(window.innerWidth - TW - 16, Math.max(16, rect.left));
+  } else {
+    tipTop  = Math.round(window.innerHeight / 2 - TH / 2);
+    tipLeft = Math.round(window.innerWidth  / 2 - TW / 2);
+  }
+
+  const spotStyle = rect && rect.width > 0 ? {
+    position: 'fixed',
+    top:    rect.top    - PAD,
+    left:   rect.left   - PAD,
+    width:  rect.width  + PAD * 2,
+    height: rect.height + PAD * 2,
+    borderRadius: 10,
+    boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
+    zIndex: 9998,
+    pointerEvents: 'none',
+    transition: 'top .2s,left .2s,width .2s,height .2s',
+  } : {
+    position: 'fixed', inset: 0,
+    background: 'rgba(0,0,0,0.55)',
+    zIndex: 9998, pointerEvents: 'none',
+  };
+
+  return (
+    <>
+      <div style={spotStyle} />
+      <div className="ns-pop-in" style={{ position: 'fixed', top: tipTop, left: tipLeft, width: TW, zIndex: 9999 }}>
+        <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #a7f3d0', boxShadow: '0 8px 32px rgba(0,0,0,.18)', padding: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#059669', background: '#ecfdf5', padding: '2px 10px', borderRadius: 999 }}>
+              {step + 1} de {TOUR_STEPS.length}
+            </span>
+            <button onClick={dismiss}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 4, display: 'flex', borderRadius: 6 }}
+                    title="Pular tour">
+              <IconClose size={14} />
+            </button>
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 6 }}>{current.title}</div>
+          <div style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.6, marginBottom: 16 }}>{current.desc}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: isLast ? 'flex-end' : 'space-between', gap: 8 }}>
+            {!isLast && (
+              <button onClick={dismiss}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#9ca3af', padding: '4px 2px' }}>
+                Pular
+              </button>
+            )}
+            <button
+              onClick={isLast ? dismiss : () => setStep(s => s + 1)}
+              style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              {isLast ? 'Concluir 🎉' : <><span>Próximo</span><IconChevRight size={13} /></>}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+Object.assign(window, { NotificationBell, PendChart, AvatarUpload, OnboardingTour });
 
 // ---------- Celebrate (confetti) ----------
 const _celebrateColors = ['#10b981', '#34d399', '#fbbf24', '#f472b6', '#60a5fa', '#a78bfa', '#f97316'];
