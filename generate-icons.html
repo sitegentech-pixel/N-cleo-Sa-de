@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Núcleo Saúde — Gerar Ícones</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f0fdf4; }
+    h1 { color: #16a34a; }
+    #status { margin: 1rem 0; font-weight: bold; }
+    .btn { display: inline-block; margin: 0.5rem; padding: 0.6rem 1.2rem;
+           background: #16a34a; color: #fff; border: none; border-radius: 6px;
+           cursor: pointer; font-size: 1rem; text-decoration: none; }
+    .btn:disabled { background: #aaa; cursor: not-allowed; }
+    #previews { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+    .preview-box { text-align: center; }
+    .preview-box canvas { display: block; border: 1px solid #ccc; border-radius: 4px; }
+    .preview-box small { display: block; margin-top: 0.3rem; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de Ícones — Núcleo Saúde</h1>
+  <p>Coloca o <strong>ico.jpg</strong> na mesma pasta deste HTML e abre no browser.<br>
+     Clica em <em>Gerar e Baixar Todos</em> para baixar os 5 arquivos.</p>
+
+  <input type="file" id="fileInput" accept="image/*" />
+  <br><br>
+  <button class="btn" id="generateBtn" disabled>Gerar e Baixar Todos</button>
+
+  <div id="status"></div>
+  <div id="previews"></div>
+
+  <script>
+    const BG = '#16a34a';
+    const SIZES = [
+      { name: 'icon-512.png',        w: 512, h: 512, pad: 0.15 },
+      { name: 'icon-192.png',        w: 192, h: 192, pad: 0.15 },
+      { name: 'apple-touch-icon.png',w: 180, h: 180, pad: 0.12 },
+      { name: 'favicon-32.png',      w: 32,  h: 32,  pad: 0.10 },
+      { name: 'favicon-16.png',      w: 16,  h: 16,  pad: 0.08 },
+    ];
+
+    let loadedImg = null;
+
+    const fileInput    = document.getElementById('fileInput');
+    const generateBtn  = document.getElementById('generateBtn');
+    const statusEl     = document.getElementById('status');
+    const previewsEl   = document.getElementById('previews');
+
+    // Auto-load ico.jpg if served via HTTP (same origin)
+    (async () => {
+      try {
+        const res = await fetch('ico.jpg');
+        if (!res.ok) throw new Error('not found');
+        const blob = await res.blob();
+        loadImg(blob, 'ico.jpg (auto)');
+      } catch {
+        statusEl.textContent = 'ico.jpg não encontrado automaticamente — seleciona o arquivo acima.';
+      }
+    })();
+
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) loadImg(file, file.name);
+    });
+
+    function loadImg(source, label) {
+      const url = URL.createObjectURL(source instanceof Blob ? source : source);
+      const img = new Image();
+      img.onload = () => {
+        loadedImg = img;
+        generateBtn.disabled = false;
+        statusEl.textContent = `✅ Imagem carregada: ${label} (${img.width}×${img.height})`;
+      };
+      img.onerror = () => { statusEl.textContent = `❌ Erro ao carregar ${label}`; };
+      img.src = url;
+    }
+
+    generateBtn.addEventListener('click', () => {
+      if (!loadedImg) return;
+      previewsEl.innerHTML = '';
+      statusEl.textContent = 'Gerando…';
+
+      SIZES.forEach(({ name, w, h, pad }) => {
+        const canvas = document.createElement('canvas');
+        canvas.width  = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = BG;
+        ctx.fillRect(0, 0, w, h);
+
+        // Centered logo with padding
+        const padPx  = Math.round(Math.min(w, h) * pad);
+        const maxW   = w - padPx * 2;
+        const maxH   = h - padPx * 2;
+        const ratio  = Math.min(maxW / loadedImg.width, maxH / loadedImg.height);
+        const dw     = loadedImg.width  * ratio;
+        const dh     = loadedImg.height * ratio;
+        const dx     = (w - dw) / 2;
+        const dy     = (h - dh) / 2;
+
+        ctx.drawImage(loadedImg, dx, dy, dw, dh);
+
+        // Download
+        canvas.toBlob(blob => {
+          const a = document.createElement('a');
+          a.href     = URL.createObjectURL(blob);
+          a.download = name;
+          a.click();
+        }, 'image/png');
+
+        // Preview
+        const box    = document.createElement('div');
+        box.className = 'preview-box';
+        const preview = document.createElement('canvas');
+        const pSize  = Math.max(w, 64);
+        preview.width = preview.height = pSize;
+        preview.style.width  = preview.style.height = Math.min(pSize, 128) + 'px';
+        preview.getContext('2d').drawImage(canvas, 0, 0);
+        const label  = document.createElement('small');
+        label.textContent = `${name} (${w}×${h})`;
+        box.appendChild(preview);
+        box.appendChild(label);
+        previewsEl.appendChild(box);
+      });
+
+      statusEl.innerHTML = `
+        ✅ 5 arquivos baixados.<br>
+        <strong>favicon.ico:</strong> converte favicon-32.png em ICO em
+        <a href="https://www.favicon.cc/?action=import_img" target="_blank">favicon.cc</a> ou
+        <a href="https://realfavicongenerator.net" target="_blank">realfavicongenerator.net</a>.<br>
+        Depois coloca todos na raiz do projeto Vercel.
+      `;
+    });
+  </script>
+</body>
+</html>
