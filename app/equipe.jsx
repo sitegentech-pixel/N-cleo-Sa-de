@@ -31,7 +31,7 @@ const Equipe = ({ profile, onOpenPendenciasFor }) => {
           return (
             <div key={u.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 hover:border-gray-300 dark:hover:border-gray-600 transition">
               <div className="flex items-start gap-3">
-                <Avatar name={u.nome} size={44}/>
+                <Avatar name={u.nome} src={u.avatar} size={44}/>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{u.nome}</div>

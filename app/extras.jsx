@@ -235,18 +235,20 @@ const PendChart = ({ items }) => {
             const counts = STAT.map(s => b.items.filter(it => it.status === s.key).length);
             const heightPct = (b.items.length / max) * 100;
             return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1.5 group">
-                <div className="relative w-full max-w-[44px] flex flex-col-reverse rounded-md overflow-hidden bg-gray-50/80 dark:bg-gray-700/50"
-                     style={{ height: `${Math.max(2, heightPct)}%`, minHeight: 4 }}>
-                  {STAT.map((s, j) => {
-                    const c = counts[j];
-                    if (c === 0) return null;
-                    return <div key={s.key} title={`${s.label}: ${c}`}
-                                style={{ background: s.color, height: `${(c / b.items.length) * 100}%` }}
-                                className="w-full transition-all"></div>;
-                  })}
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">
-                    {b.items.length}
+              <div key={i} className="h-full flex-1 flex flex-col items-center group">
+                <div className="h-[135px] w-full flex items-end justify-center mb-1.5">
+                  <div className="relative w-full max-w-[44px] flex flex-col-reverse rounded-md overflow-hidden bg-gray-50/80 dark:bg-gray-700/50 transition-all duration-300 hover:scale-[1.06] active:scale-95 cursor-pointer shadow-sm hover:shadow-md"
+                       style={{ height: `${Math.max(2, heightPct)}%`, minHeight: 4 }}>
+                    {STAT.map((s, j) => {
+                      const c = counts[j];
+                      if (c === 0) return null;
+                      return <div key={s.key} title={`${s.label}: ${c}`}
+                                  style={{ background: s.color, height: `${(c / b.items.length) * 100}%` }}
+                                  className="w-full transition-all duration-300 hover:brightness-[1.08]"></div>;
+                    })}
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 pointer-events-none shadow-pop tabular-nums whitespace-nowrap z-10">
+                      {b.items.length} {b.items.length === 1 ? 'item' : 'itens'}
+                    </div>
                   </div>
                 </div>
                 <div className="text-[10px] text-gray-500 dark:text-gray-400 tracking-tight whitespace-nowrap">{b.label}</div>
@@ -446,18 +448,53 @@ const _ensureCelebrateLayer = () => {
         100% { transform: translate3d(var(--dx),var(--dy),0) rotate(var(--rot)); opacity: 0; }
       }
       @keyframes ns-toast-pop {
-        0%   { transform: translate(-50%,40px) scale(.9); opacity: 0; }
-        15%  { transform: translate(-50%,0)   scale(1.04); opacity: 1; }
-        100% { transform: translate(-50%,-30px) scale(1); opacity: 0; }
+        0%   { transform: translate(-50%, 80px) scale(.85) rotate(-1.5deg); opacity: 0; }
+        12%  { transform: translate(-50%, 0)   scale(1.05) rotate(1deg); opacity: 1; }
+        16%  { transform: translate(-50%, 0)   scale(1) rotate(0deg); opacity: 1; }
+        84%  { transform: translate(-50%, 0)   scale(1) rotate(0deg); opacity: 1; }
+        100% { transform: translate(-50%, -40px) scale(.92); opacity: 0; }
+      }
+      @keyframes ns-sparkle {
+        0%, 100% { opacity: 0.4; transform: scale(0.85); }
+        50% { opacity: 1; transform: scale(1.15); }
+      }
+      @keyframes ns-icon-bounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.25) rotate(8deg); }
       }
       .ns-celebrate-toast {
-        position: fixed; left: 50%; top: 18%; transform: translate(-50%,0);
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: #fff; padding: 14px 22px; border-radius: 999px;
-        font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
-        box-shadow: 0 18px 40px -12px rgba(16,185,129,.55), 0 0 0 6px rgba(16,185,129,.08);
-        animation: ns-toast-pop 1800ms cubic-bezier(.2,.8,.2,1) forwards;
+        position: fixed; left: 50%; top: 22%; transform: translate(-50%,0);
+        background: rgba(255, 255, 255, 0.95);
+        color: #0f172a; padding: 14px 24px; border-radius: 20px;
+        font-size: 14px; font-weight: 700; letter-spacing: -0.015em;
         display: inline-flex; align-items: center; gap: 10px;
+        border: 2px solid #a7f3d0;
+        box-shadow: 
+          0 24px 48px -12px rgba(5, 150, 105, 0.2),
+          0 0 0 1px rgba(16, 185, 129, 0.04),
+          inset 0 1px 2px rgba(255, 255, 255, 0.6);
+        animation: ns-toast-pop 2500ms cubic-bezier(.17,1,.22,1) forwards;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      .dark .ns-celebrate-toast {
+        background: rgba(30, 41, 59, 0.95);
+        color: #f8fafc;
+        border-color: #065f46;
+        box-shadow: 
+          0 24px 48px -12px rgba(0, 0, 0, 0.55),
+          0 0 0 1px rgba(255, 255, 255, 0.05),
+          inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      }
+      .ns-celebrate-icon {
+        font-size: 20px;
+        display: inline-block;
+        animation: ns-icon-bounce 1.5s infinite ease-in-out;
+      }
+      .ns-celebrate-spark {
+        font-size: 14px;
+        animation: ns-sparkle 1.2s infinite ease-in-out;
+        color: #eab308;
       }
     `;
     document.head.appendChild(s);
@@ -466,44 +503,54 @@ const _ensureCelebrateLayer = () => {
 };
 
 const celebrate = (opts = {}) => {
-  const { count = 70, origin, message } = opts;
+  const { count = 80, origin, message } = opts;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     if (message) toast(message);
     return;
   }
   const layer = _ensureCelebrateLayer();
-  const cx = origin?.x ?? window.innerWidth / 2;
-  const cy = origin?.y ?? Math.min(window.innerHeight * 0.35, 280);
+  
+  // Confetti from two sources: bottom-left shooting up-right and bottom-right shooting up-left
+  const origins = [
+    { x: 0, y: window.innerHeight, angle: -Math.PI / 4 },
+    { x: window.innerWidth, y: window.innerHeight, angle: -3 * Math.PI / 4 }
+  ];
 
-  for (let i = 0; i < count; i++) {
-    const el = document.createElement('span');
-    const isCircle = Math.random() < 0.35;
-    const size = 6 + Math.random() * 8;
-    const color = _celebrateColors[(Math.random() * _celebrateColors.length) | 0];
-    const ang = Math.random() * Math.PI * 2;
-    const dist = 140 + Math.random() * 260;
-    const dx = Math.cos(ang) * dist;
-    const dy = Math.sin(ang) * dist + 220 + Math.random() * 140; // gravity
-    const rot = (Math.random() * 720 - 360) | 0;
-    const dur = 900 + Math.random() * 900;
-    el.style.cssText = `
-      position:absolute;left:${cx}px;top:${cy}px;
-      width:${size}px;height:${isCircle ? size : size * 0.5}px;
-      background:${color};border-radius:${isCircle ? '999px' : '2px'};
-      --dx:${dx}px;--dy:${dy}px;--rot:${rot}deg;
-      animation: ns-confetti-fall ${dur}ms cubic-bezier(.2,.7,.3,1) forwards;
-      will-change: transform, opacity;
-    `;
-    layer.appendChild(el);
-    setTimeout(() => el.remove(), dur + 60);
-  }
+  origins.forEach(orig => {
+    for (let i = 0; i < count / 2; i++) {
+      const el = document.createElement('span');
+      const isCircle = Math.random() < 0.4;
+      const size = 6 + Math.random() * 8;
+      const color = _celebrateColors[(Math.random() * _celebrateColors.length) | 0];
+      const ang = orig.angle + (Math.random() * 0.5 - 0.25);
+      const dist = 320 + Math.random() * 400;
+      const dx = Math.cos(ang) * dist;
+      const dy = Math.sin(ang) * dist + 240 + Math.random() * 120; // gravity pull
+      const rot = (Math.random() * 1080 - 540) | 0;
+      const dur = 1200 + Math.random() * 1000;
+      el.style.cssText = `
+        position:absolute;left:${orig.x}px;top:${orig.y}px;
+        width:${size}px;height:${isCircle ? size : size * 0.55}px;
+        background:${color};border-radius:${isCircle ? '999px' : '2.5px'};
+        --dx:${dx}px;--dy:${dy}px;--rot:${rot}deg;
+        animation: ns-confetti-fall ${dur}ms cubic-bezier(.12,.8,.32,1) forwards;
+        will-change: transform, opacity;
+      `;
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), dur + 60);
+    }
+  });
 
   if (message) {
     const t = document.createElement('div');
     t.className = 'ns-celebrate-toast';
-    t.innerHTML = `<span style="font-size:18px">🎉</span><span>${message}</span>`;
+    t.innerHTML = `
+      <span class="ns-celebrate-icon">🎉</span>
+      <span>${message}</span>
+      <span class="ns-celebrate-spark">✨</span>
+    `;
     layer.appendChild(t);
-    setTimeout(() => t.remove(), 1900);
+    setTimeout(() => t.remove(), 2600);
   }
 };
 

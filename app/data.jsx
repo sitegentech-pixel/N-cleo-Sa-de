@@ -341,6 +341,14 @@ const api = {
     if (error) { await api.loadPendencias(); toast('Erro ao excluir.', 'error'); }
   },
 
+  archivarPendencia: async (id) => {
+    await api.updatePendencia(id, { arquivado: true });
+  },
+
+  restaurarPendencia: async (id) => {
+    await api.updatePendencia(id, { arquivado: false });
+  },
+
   // demandas
   createDemanda: async (data, profile) => {
     const payload = { 

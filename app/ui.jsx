@@ -20,7 +20,7 @@ const ToastHost = () => {
     return () => _toastSubs.delete(sub);
   }, []);
   return (
-    <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+    <div className="fixed top-4 right-2 sm:right-4 z-[100] flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-16px)] sm:max-w-none">
       {items.map(t => {
         const colors = t.kind === 'error'
           ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-800 dark:text-rose-200 border-rose-200 dark:border-rose-800'
@@ -30,7 +30,7 @@ const ToastHost = () => {
         const dot = t.kind === 'error' ? 'bg-rose-500' : t.kind === 'info' ? 'bg-sky-500' : 'bg-emerald-500';
         return (
           <div key={t.id}
-               className={`ns-toast-in pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-pop min-w-[260px] ${colors}`}>
+               className={`ns-toast-in pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-pop min-w-[220px] sm:min-w-[260px] ${colors}`}>
             <span className={`w-2 h-2 rounded-full ${dot}`}></span>
             <span className="text-sm font-medium">{t.message}</span>
           </div>

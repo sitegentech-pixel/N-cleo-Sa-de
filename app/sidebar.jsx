@@ -47,7 +47,7 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
     { id: 'pendencias',  label: 'Minhas Pendências', icon: <IconCheckSq size={18} />, badge: counts?.pendOpen, tourId: 'pendencias' },
     { id: 'demandas',    label: 'Demandas',          icon: <IconInbox size={18} />,   badge: counts?.demOpen,  tourId: 'demandas'   },
     { id: 'equipe',      label: 'Equipe',            icon: <IconUsers size={18} /> },
-    { id: 'feedback',    label: 'Feedback',          icon: <IconSpark size={18} /> },
+    { id: 'calendario',  label: 'Calendário',         icon: <IconCal size={18} /> },
     ...(isGestor ? [{ id: 'usuarios', label: 'Usuários', icon: <IconShield size={18} /> }] : []),
   ];
 
@@ -130,6 +130,13 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
           <div className="flex items-center justify-between text-[10px] text-gray-500">
             <span className="tracking-wide uppercase">Desenvolvido por</span>
             <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => onNavigate('feedback')}
+                className="text-gray-600 hover:text-gray-400 transition-colors"
+                title="Relatar problema ou sugerir melhoria">
+                <IconSpark size={11}/>
+              </button>
+              <span className="text-gray-700">·</span>
               <a href="https://sitegentch.vercel.app/" target="_blank" rel="noopener noreferrer"
                  className="font-semibold text-gray-300 hover:text-white transition-colors"
                  title="Portfólio">

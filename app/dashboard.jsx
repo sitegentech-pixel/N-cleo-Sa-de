@@ -1,12 +1,12 @@
 // Dashboard ("Meu dia") — greeting, count cards, recent activity feed.
 
 const PageHeader = ({ title, subtitle, right }) => (
-  <div className="flex items-end justify-between gap-4 mb-6">
-    <div>
+  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+    <div className="min-w-0">
       <h1 className="text-[22px] font-semibold tracking-tight text-gray-900 dark:text-gray-100">{title}</h1>
       {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
     </div>
-    {right}
+    {right && <div className="shrink-0">{right}</div>}
   </div>
 );
 
@@ -158,175 +158,228 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
       <div className="flex justify-end mb-6 no-print">
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-card transition"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-650 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 shadow-card transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
             <path d="M6 9V3h12v6"/>
             <rect x="6" y="14" width="12" height="8" rx="1"/>
           </svg>
-          Imprimir
+          Imprimir Relatório
         </button>
       </div>
 
       <div className="space-y-8">
 
-        {/* ── BLOCO A — Ranking ── */}
+        {/* ── BLOCO A — Classificação de Produtividade Semanal ── */}
         <section>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Ranking da Semana</h2>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 w-10">#</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Colaborador</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 hidden sm:table-cell">Pendências</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 hidden sm:table-cell">Demandas</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-400">Pts</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 hidden md:table-cell w-36">Progresso</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                {rankingData.map((row, idx) => {
-                  const isFirst = idx === 0 && row.score > 0;
-                  const isZero  = row.score === 0;
-                  return (
-                    <tr key={row.user.id}
-                        className={`transition-colors ${isFirst ? 'bg-amber-50/50 dark:bg-amber-950/20' : isZero ? 'bg-gray-50/20 dark:bg-gray-900/20' : 'hover:bg-gray-50/50 dark:hover:bg-gray-700/30'}`}>
-                      <td className="px-4 py-3 text-center">
-                        {isFirst
-                          ? <span className="text-lg leading-none">🥇</span>
-                          : <span className={`text-sm font-semibold ${isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-400'}`}>{idx + 1}</span>}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar name={row.user.nome} src={row.user.avatar} size={28}/>
-                          <span className={`text-sm font-medium ${isZero ? 'text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'}`}>{row.user.nome}</span>
-                          {isFirst && <Badge tone="yellow">Líder</Badge>}
+          <div className="flex items-baseline justify-between mb-5 border-b border-gray-100 dark:border-gray-800 pb-2">
+            <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Classificação de Produtividade Semanal</h2>
+            <span className="text-[10px] font-mono text-gray-400">Dados da semana corrente</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {rankingData.map((row, idx) => {
+              const isFirst = idx === 0 && row.score > 0;
+              const isZero  = row.score === 0;
+              return (
+                <div
+                  key={row.user.id}
+                  className={`relative flex items-center justify-between p-5 rounded-xl border transition-all duration-200 ${
+                    isFirst
+                      ? 'bg-gradient-to-br from-amber-50/20 to-white dark:from-amber-950/10 dark:to-gray-800/20 border-amber-200/60 dark:border-amber-900/40 shadow-sm'
+                      : 'bg-white dark:bg-gray-800 border-gray-200/80 dark:border-gray-750'
+                  } hover:border-gray-300 dark:hover:border-gray-650`}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className={`text-3xl font-light font-mono leading-none tracking-tight ${
+                      isFirst ? 'text-amber-500 dark:text-amber-400 font-normal' : 'text-gray-300 dark:text-gray-600'
+                    }`}>
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={row.user.nome} src={row.user.avatar} size={36}/>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${isZero ? 'text-gray-450 dark:text-gray-500' : 'text-gray-855 dark:text-gray-100'}`}>
+                            {row.user.nome}
+                          </span>
+                          {isFirst && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium tracking-wider uppercase border border-amber-300/50 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400">
+                              Líder
+                            </span>
+                          )}
                         </div>
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm tabular-nums hidden sm:table-cell">
-                        <span className={isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-600 dark:text-gray-300'}>{row.pends}</span>
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm tabular-nums hidden sm:table-cell">
-                        <span className={isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-600 dark:text-gray-300'}>{row.dems}</span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`text-sm font-bold tabular-nums ${isFirst ? 'text-amber-600 dark:text-amber-400' : isZero ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-300'}`}>
-                          {row.score}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 flex gap-2 font-mono">
+                          <span>{row.pends} pend</span>
+                          <span className="text-gray-300 dark:text-gray-700">•</span>
+                          <span>{row.dems} dem</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-xl font-bold font-mono ${isFirst ? 'text-amber-600 dark:text-amber-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                        {row.score}
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium font-mono">pts</span>
+                    </div>
+
+                    <div className="flex gap-0.5 items-center">
+                      {Array.from({ length: 6 }).map((_, i) => {
+                        const val = (i + 1) * (100 / 6);
+                        const isActive = row.pct >= val - (100 / 12);
+                        return (
                           <div
-                            className={`h-full rounded-full transition-all ${isFirst ? 'bg-amber-400' : isZero ? 'bg-gray-100 dark:bg-gray-700' : 'bg-brand-500'}`}
-                            style={{ width: `${row.pct}%` }}
+                            key={i}
+                            className={`h-2.5 w-1 rounded-[1px] transition-all duration-300 ${
+                              isActive
+                                ? isFirst ? 'bg-amber-500/85 dark:bg-amber-400/85' : 'bg-brand-500/85 dark:bg-brand-400/85'
+                                : 'bg-gray-105 dark:bg-gray-750'
+                            }`}
                           />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
-        {/* ── BLOCO B — Itens em Atraso ── */}
+        {/* ── BLOCO B — Prazos e Pendências Excedidas ── */}
         <section>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Itens em Atraso</h2>
+          <div className="flex items-baseline justify-between mb-5 border-b border-gray-100 dark:border-gray-800 pb-2">
+            <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Prazos e Pendências Excedidas</h2>
+            {overdueItems.length > 0 && (
+              <span className="text-[10px] font-mono font-medium text-rose-655 bg-rose-50 dark:bg-rose-950/20 px-2 py-0.5 rounded border border-rose-200/30 dark:border-rose-900/30">
+                {overdueItems.length} {overdueItems.length === 1 ? 'item' : 'itens'} em atraso
+              </span>
+            )}
+          </div>
+
           {overdueItems.length === 0 ? (
-            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-xl p-8 text-center">
-              <div className="text-3xl mb-2">✅</div>
-              <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Nenhum item em atraso.</div>
-              <div className="text-xs text-emerald-500 dark:text-emerald-400 mt-1">Equipe em dia!</div>
+            <div className="bg-transparent border border-dashed border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center flex flex-col items-center justify-center">
+              <span className="w-10 h-10 rounded-full bg-emerald-50/50 dark:bg-emerald-950/10 text-emerald-500 flex items-center justify-center mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </span>
+              <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">Cronograma em conformidade</div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Nenhum item pendente com prazo expirado.</div>
             </div>
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Tipo</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Título</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 hidden sm:table-cell">Responsável</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Prazo</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 hidden sm:table-cell">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                  {overdueItems.map(it => (
-                    <tr key={`${it._kind}-${it.id}`} className="hover:bg-rose-50/30 dark:hover:bg-rose-950/20 transition-colors">
-                      <td className="px-4 py-3">
-                        <Badge tone={it._kind === 'pendencia' ? 'yellow' : 'violet'}>
-                          {it._kind === 'pendencia' ? 'Pend.' : 'Dem.'}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 max-w-[200px]">
-                        <span className="line-clamp-1">{it.titulo}</span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">{it.responsavel}</td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 inline-flex items-center gap-1">
-                          <IconAlert size={11}/>{formatDate(it.prazo)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        {it._kind === 'pendencia'
-                          ? <StatusBadgePend status={it.status}/>
-                          : <StatusBadgeDem  status={it.status}/>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="divide-y divide-gray-100 dark:divide-gray-750">
+                {overdueItems.map(it => (
+                  <div key={`${it._kind}-${it.id}`} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-rose-50/10 dark:hover:bg-rose-955/5 transition-colors">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded font-mono text-[9px] font-bold uppercase tracking-wider flex-shrink-0 border ${
+                        it._kind === 'pendencia'
+                          ? 'border-amber-200 bg-amber-50/30 text-amber-700 dark:border-amber-900/30 dark:text-amber-400'
+                          : 'border-violet-200 bg-violet-50/30 text-violet-700 dark:border-violet-900/30 dark:text-violet-400'
+                      }`}>
+                        {it._kind === 'pendencia' ? 'Pend' : 'Dem'}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{it.titulo}</div>
+                        <div className="text-xs text-gray-405 mt-1 flex items-center gap-1.5">
+                          <Avatar name={it.responsavel} src={store.profiles.find(p => p.nome === it.responsavel)?.avatar} size={16}/>
+                          <span className="font-medium text-gray-500 dark:text-gray-400">{it.responsavel}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-6 flex-shrink-0">
+                      <span className="text-xs font-mono font-medium text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        {formatDate(it.prazo)}
+                      </span>
+
+                      <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-gray-400 dark:text-gray-550 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 px-2 py-0.5 rounded">
+                        {it.status.replace('-', ' ')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </section>
 
         {/* ── BLOCO C + D side-by-side ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-          {/* BLOCO C — Progresso da Meta */}
+          {/* BLOCO C — Progresso das Metas */}
           <section className="flex flex-col">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Progresso da Meta</h2>
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 flex-1">
+            <div className="flex items-baseline justify-between mb-5 border-b border-gray-100 dark:border-gray-800 pb-2">
+              <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Progresso das Metas</h2>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-6 flex-1 flex flex-col justify-between">
               {currentGoal ? (
-                <div>
-                  <div className="flex items-baseline justify-between mb-3">
+                <div className="space-y-6">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-3xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{concludedWk}</span>
-                      <span className="text-sm text-gray-400 dark:text-gray-500 ml-2">/ {goalTotal} concluídas</span>
-                    </div>
-                    <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-2.5 py-1 rounded-full font-medium">
-                      {daysLeft}d restantes
-                    </span>
-                  </div>
-                  <div className="h-5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-1.5">
-                    <div
-                      className={`h-full rounded-full transition-all ${goalPct >= 100 ? 'bg-emerald-500' : 'bg-brand-500'}`}
-                      style={{ width: `${goalPct}%` }}
-                    />
-                  </div>
-                  <div className="text-right text-sm font-bold text-brand-600 mb-5">{Math.round(goalPct)}%</div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-brand-50 dark:bg-brand-950/30 rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-brand-700 dark:text-brand-300 tabular-nums">
-                        {pendDone}
-                        <span className="text-sm text-brand-400 dark:text-brand-500 font-normal"> / {currentGoal.qtd_pendencias}</span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-5xl font-extrabold font-mono text-gray-950 dark:text-white leading-none tracking-tight">{concludedWk}</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider font-mono">entregas</span>
                       </div>
-                      <div className="text-xs text-brand-600 dark:text-brand-400 mt-1">Pendências</div>
-                      <div className="mt-2.5 h-1.5 bg-brand-100 dark:bg-brand-950 rounded-full overflow-hidden">
+                      <p className="text-xs text-gray-500 dark:text-gray-450 mt-2 font-medium">De um objetivo de {goalTotal} nesta semana</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className="text-xs font-mono font-bold text-brand-600 dark:text-brand-400 border border-brand-200/50 dark:border-brand-900/30 px-2.5 py-1 rounded bg-brand-50/50 dark:bg-brand-950/20">
+                        {daysLeft}d restantes
+                      </span>
+                      <span className="text-[10px] font-mono text-gray-400">{Math.round(goalPct)}% atingido</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="h-4 w-full bg-gray-50 dark:bg-gray-900 rounded border border-gray-200/50 dark:border-gray-750 p-[2px] flex gap-[2px]">
+                      {Array.from({ length: 20 }).map((_, i) => {
+                        const val = (i + 1) * (100 / 20);
+                        const isActive = goalPct >= val - (100 / 40);
+                        return (
+                          <div
+                            key={i}
+                            className={`h-full flex-1 rounded-[1px] transition-all duration-300 ${
+                              isActive
+                                ? goalPct >= 100 ? 'bg-emerald-500' : 'bg-brand-500'
+                                : 'bg-transparent'
+                            }`}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-gray-50/50 dark:bg-gray-900/30 border border-gray-150 dark:border-gray-750">
+                      <div className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider font-mono">Pendências</div>
+                      <div className="text-2xl font-bold font-mono text-gray-800 dark:text-gray-150 mt-1">
+                        {pendDone}
+                        <span className="text-sm font-normal text-gray-450"> / {currentGoal.qtd_pendencias}</span>
+                      </div>
+                      <div className="mt-2 h-1 bg-gray-150 dark:bg-gray-800 rounded-full overflow-hidden">
                         <div className="h-full bg-brand-500 rounded-full"
                              style={{ width: `${Math.min(100, (pendDone / currentGoal.qtd_pendencias) * 100)}%` }}/>
                       </div>
                     </div>
-                    <div className="bg-violet-50 dark:bg-violet-950/30 rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-violet-700 dark:text-violet-300 tabular-nums">
+
+                    <div className="p-4 rounded-xl bg-gray-50/50 dark:bg-gray-900/30 border border-gray-150 dark:border-gray-750">
+                      <div className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider font-mono">Demandas</div>
+                      <div className="text-2xl font-bold font-mono text-gray-800 dark:text-gray-150 mt-1">
                         {demDone}
-                        <span className="text-sm text-violet-400 dark:text-violet-500 font-normal"> / {currentGoal.qtd_demandas}</span>
+                        <span className="text-sm font-normal text-gray-455"> / {currentGoal.qtd_demandas}</span>
                       </div>
-                      <div className="text-xs text-violet-600 dark:text-violet-400 mt-1">Demandas</div>
-                      <div className="mt-2.5 h-1.5 bg-violet-100 dark:bg-violet-950 rounded-full overflow-hidden">
+                      <div className="mt-2 h-1 bg-gray-150 dark:bg-gray-800 rounded-full overflow-hidden">
                         <div className="h-full bg-violet-500 rounded-full"
                              style={{ width: `${Math.min(100, (demDone / currentGoal.qtd_demandas) * 100)}%` }}/>
                       </div>
@@ -334,13 +387,16 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center min-h-[180px] text-center gap-4">
-                  <div className="text-5xl">🎯</div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-300">Sem meta para esta semana.</div>
-                    <div className="text-xs text-gray-400 mt-1">Defina um objetivo para a equipe.</div>
-                  </div>
-                  <Btn kind="secondary" onClick={onMetaOpen}>Definir Meta</Btn>
+                <div className="flex flex-col items-center justify-center min-h-[220px] text-center p-6 bg-gray-50/30 dark:bg-gray-900/10 rounded-xl border border-dashed border-gray-200 dark:border-gray-850">
+                  <span className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 flex items-center justify-center mb-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="6" />
+                    </svg>
+                  </span>
+                  <div className="text-sm font-semibold text-gray-805 dark:text-gray-200">Sem meta de produtividade ativa</div>
+                  <div className="text-xs text-gray-405 dark:text-gray-500 mt-1 mb-5">Defina objetivos semanais claros de entregas para a equipe.</div>
+                  <Btn kind="secondary" size="sm" onClick={onMetaOpen}>Definir Meta</Btn>
                 </div>
               )}
             </div>
@@ -348,34 +404,36 @@ const RelatorioView = ({ store, profile, currentGoal, onMetaOpen }) => {
 
           {/* BLOCO D — Demandas por Status */}
           <section className="flex flex-col">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Demandas por Status</h2>
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 flex-1">
-              <div className="space-y-5">
+            <div className="flex items-baseline justify-between mb-5 border-b border-gray-100 dark:border-gray-800 pb-2">
+              <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Demandas por Status</h2>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-6 flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
                 {[
-                  { label: 'Abertas',      count: ds.aberta,      bar: 'bg-sky-400',     text: 'text-sky-600'     },
-                  { label: 'Em Andamento', count: ds.emAndamento,  bar: 'bg-amber-400',   text: 'text-amber-600'   },
-                  { label: 'Concluídas',   count: ds.concluida,    bar: 'bg-emerald-500', text: 'text-emerald-600' },
+                  { label: 'Abertas',      count: ds.aberta,      bar: 'bg-sky-500',     text: 'text-sky-600 dark:text-sky-400'     },
+                  { label: 'Em Andamento', count: ds.emAndamento,  bar: 'bg-amber-500',   text: 'text-amber-600 dark:text-amber-400'   },
+                  { label: 'Concluídas',   count: ds.concluida,    bar: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
                   { label: 'Canceladas',   count: ds.cancelada,    bar: 'bg-gray-300 dark:bg-gray-600',    text: 'text-gray-500 dark:text-gray-400'    },
                 ].map(row => (
                   <div key={row.label}>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${row.bar}`}/>
-                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">{row.label}</span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${row.bar}`}/>
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{row.label}</span>
                       </div>
-                      <span className={`text-xs font-bold tabular-nums ${row.text}`}>{row.count}</span>
+                      <span className={`text-xs font-bold font-mono tabular-nums ${row.text}`}>{row.count}</span>
                     </div>
-                    <div className="h-3 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-1 w-full bg-gray-100 dark:bg-gray-750 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all ${row.bar}`}
+                        className={`h-full rounded-full transition-all duration-300 ${row.bar}`}
                         style={{ width: `${(row.count / totalDem) * 100}%` }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400 text-right">
-                {store.demandas.length} demandas no total
+              <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 text-[10px] font-mono text-gray-400 dark:text-gray-500 text-right">
+                Total de {store.demandas.length} demandas registradas
               </div>
             </div>
           </section>
@@ -485,7 +543,7 @@ const Dashboard = ({ profile, onNavigate }) => {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1280px] mx-auto">
       <PageHeader
-        title={<span>{greeting}, {profile.nome.split(' ')[0]} <span className="text-yellow-500">👋</span></span>}
+        title={<span>{greeting}, {profile.nome.split(' ')[0]}</span>}
         subtitle={<span className="capitalize">{dateStr} · {today.getFullYear()}</span>}
         right={isGestor && (
           <SegTabs value={scope} onChange={setScope} items={[

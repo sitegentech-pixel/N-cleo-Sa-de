@@ -53,11 +53,15 @@ const IconCircle    = (p) => (<Icon {...p}><circle cx="12" cy="12" r="9"/></Icon
 const IconDot       = (p) => (<Icon {...p} strokeWidth={0}><circle cx="12" cy="12" r="4" fill="currentColor"/></Icon>);
 const IconSpark     = (p) => (<Icon {...p}><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="m15.5 15.5 2.5 2.5"/><path d="m18 6-2.5 2.5"/><path d="m8.5 15.5 -2.5 2.5"/></Icon>);
 const IconDrag      = (p) => (<Icon {...p} strokeWidth={2}><circle cx="9" cy="6" r=".8" fill="currentColor"/><circle cx="9" cy="12" r=".8" fill="currentColor"/><circle cx="9" cy="18" r=".8" fill="currentColor"/><circle cx="15" cy="6" r=".8" fill="currentColor"/><circle cx="15" cy="12" r=".8" fill="currentColor"/><circle cx="15" cy="18" r=".8" fill="currentColor"/></Icon>);
+const IconList      = (p) => (<Icon {...p}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6" strokeWidth={3}/><line x1="3" y1="12" x2="3.01" y2="12" strokeWidth={3}/><line x1="3" y1="18" x2="3.01" y2="18" strokeWidth={3}/></Icon>);
+const IconColumns   = (p) => (<Icon {...p}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></Icon>);
+const IconArchive   = (p) => (<Icon {...p}><path d="M3 9V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9"/><path d="M1 5h22v4H1z"/><path d="M10 13h4"/></Icon>);
+const IconRotateCcw = (p) => (<Icon {...p}><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></Icon>);
 
 Object.assign(window, {
   Icon, IconLogo, IconHome, IconCheckSq, IconInbox, IconUsers, IconShield,
   IconLogout, IconPlus, IconSearch, IconPencil, IconTrash, IconChevDown,
   IconChevRight, IconClose, IconBell, IconBolt, IconAlert, IconClock, IconCal,
   IconUser, IconMenu, IconFilter, IconHistory, IconCheck, IconCircle, IconDot,
-  IconSpark, IconDrag,
+  IconSpark, IconDrag, IconList, IconColumns, IconArchive, IconRotateCcw,
 });

@@ -1,10 +1,11 @@
-const STATIC_CACHE = 'ns-static-v1';
+const STATIC_CACHE = 'ns-static-v7';
 const CDN_CACHE    = 'ns-cdn-v1';
 const API_CACHE    = 'ns-api-v1';
 const ALL_CACHES   = [STATIC_CACHE, CDN_CACHE, API_CACHE];
 
 const STATIC_FILES = [
   '/index.html',
+  '/index.prod.html',
   '/manifest.json',
   '/favicon.ico',
   '/icon-192.png',
@@ -21,10 +22,27 @@ const STATIC_FILES = [
   '/app/pendencias.jsx',
   '/app/demandas.jsx',
   '/app/equipe.jsx',
+  '/app/calendario.jsx',
   '/app/feedback.jsx',
   '/app/usuarios.jsx',
   '/app/perfil.jsx',
   '/app/main.jsx',
+  '/dist/app/icons.js',
+  '/dist/app/ui.js',
+  '/dist/app/tweaks-panel.js',
+  '/dist/app/data.js',
+  '/dist/app/extras.js',
+  '/dist/app/sidebar.js',
+  '/dist/app/login.js',
+  '/dist/app/dashboard.js',
+  '/dist/app/pendencias.js',
+  '/dist/app/demandas.js',
+  '/dist/app/equipe.js',
+  '/dist/app/calendario.js',
+  '/dist/app/feedback.js',
+  '/dist/app/usuarios.js',
+  '/dist/app/perfil.js',
+  '/dist/app/main.js',
   '/ico.jpg',
   '/og.jpg',
 ];

@@ -21,13 +21,14 @@ const OfflineBanner = () => {
 };
 
 const PAGE_TITLES = {
-  dashboard:  'Dashboard',
-  pendencias: 'Minhas Pendências',
-  demandas:   'Demandas',
-  equipe:     'Equipe',
-  feedback:   'Feedback',
-  usuarios:   'Usuários',
-  perfil:     'Meu Perfil',
+  dashboard:   'Dashboard',
+  pendencias:  'Minhas Pendências',
+  demandas:    'Demandas',
+  equipe:      'Equipe',
+  calendario:  'Calendário',
+  feedback:    'Feedback',
+  usuarios:    'Usuários',
+  perfil:      'Meu Perfil',
 };
 
 const App = () => {
@@ -39,19 +40,91 @@ const App = () => {
   const profile = profileId ? store.profiles.find(p => p.id === profileId) : null;
 
   React.useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) { setAuthLoading(false); return; }
-      let { data: prof } = await supabase
-        .from('profiles').select('*').eq('id', session.user.id).single();
-      if (prof && prof.ativo) {
-        prof.avatar = prof.avatar_url || null;
-        await loadAll();
-        setProfileId(prof.id);
-      } else {
-        await supabase.auth.signOut();
+    let active = true;
+
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          if (active) setAuthLoading(false);
+          return;
+        }
+
+        const user = session.user;
+        let { data: profile } = await supabase
+          .from('profiles').select('*').eq('id', user.id).single();
+
+        if (!profile) {
+          const newProfile = {
+            id:    user.id,
+            email: user.email,
+            nome:  user.user_metadata?.nome || user.email.split('@')[0],
+            role:  'funcionario',
+            ativo: true,
+          };
+          const { data: createdProfile } = await supabase.from('profiles').upsert(newProfile).select().single();
+          profile = createdProfile;
+        }
+
+        if (profile && !profile.ativo) {
+          await supabase.auth.signOut();
+          if (active) {
+            setProfileId(null);
+            setAuthLoading(false);
+          }
+          return;
+        }
+
+        if (profile) {
+          profile.avatar = profile.avatar_url || null;
+          await loadAll();
+          if (active) {
+            setProfileId(profile.id);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao inicializar sessão:", err);
+      } finally {
+        if (active) setAuthLoading(false);
       }
-      setAuthLoading(false);
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        if (active) {
+          setProfileId(null);
+          setAuthLoading(false);
+        }
+      } else if (event === 'SIGNED_IN' && session) {
+        const user = session.user;
+        let { data: profile } = await supabase
+          .from('profiles').select('*').eq('id', user.id).single();
+        
+        if (profile && !profile.ativo) {
+          await supabase.auth.signOut();
+          if (active) {
+            setProfileId(null);
+          }
+          return;
+        }
+
+        if (profile) {
+          profile.avatar = profile.avatar_url || null;
+          await loadAll();
+          if (active) {
+            setProfileId(profile.id);
+            setPage('dashboard');
+          }
+        }
+      }
     });
+
+    return () => {
+      active = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -119,7 +192,8 @@ const App = () => {
       case 'dashboard':  return <Dashboard profile={profile} onNavigate={handleNavigate} />;
       case 'pendencias': return <Pendencias profile={profile} filterByResponsavel={pendFilter} />;
       case 'demandas':   return <Demandas profile={profile} />;
-      case 'equipe':     return <Equipe profile={profile} onOpenPendenciasFor={(nome) => { setPendFilter(nome); setPage('pendencias'); }} />;
+      case 'equipe':      return <Equipe profile={profile} onOpenPendenciasFor={(nome) => { setPendFilter(nome); setPage('pendencias'); }} />;
+      case 'calendario':  return <CalendarioView profile={profile} />;
       case 'feedback':   return <Feedback profile={profile} />;
       case 'usuarios':
         if (profile.role !== 'gestor') return <Dashboard profile={profile} onNavigate={handleNavigate}/>;

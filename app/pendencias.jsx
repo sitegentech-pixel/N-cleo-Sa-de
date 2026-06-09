@@ -31,7 +31,7 @@ const LabelChip = ({ label, active, onClick }) => (
   </button>
 );
 
-const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd, dragging, isMobile, colIndex, onMove }) => {
+const PendenciaCard = ({ p, onEdit, onArchive, canArchive, onDragStart, onDragEnd, dragging, isMobile, colIndex, onMove }) => {
   const store = useStore();
   const overdue = isOverdue(p.prazo, p.status, 'concluido');
   const user = store.profiles.find(x => x.id === p.responsavel_id);
@@ -127,15 +127,54 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
                   title="Editar">
             <IconPencil size={14}/>
           </button>
-          {canDelete && (
-            <button onClick={() => onDelete(p)}
-                    className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                    title="Excluir">
-              <IconTrash size={14}/>
+          {canArchive && (
+            <button onClick={() => onArchive(p)}
+                    className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                    title="Arquivar">
+              <IconArchive size={14}/>
             </button>
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+const STATUS_LABEL = { 'nao-concluido': 'Não concluído', 'em-andamento': 'Em andamento', 'concluido': 'Concluído' };
+
+const ArchivedPendenciaCard = ({ p, onRestore, onDelete, isGestor }) => {
+  const store = useStore();
+  const user = store.profiles.find(x => x.id === p.responsavel_id);
+  const respName = user ? user.nome : (p.responsavel || '—');
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{p.titulo}</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 flex flex-wrap gap-x-2 mt-0.5">
+          <span>{respName}</span>
+          <span>·</span>
+          <span>{STATUS_LABEL[p.status] || p.status}</span>
+          {p.prazo && <><span>·</span><span>{formatDate(p.prazo)}</span></>}
+        </div>
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <button
+          onClick={() => onRestore(p)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/30 rounded-lg transition"
+        >
+          <IconRotateCcw size={12}/>
+          Restaurar
+        </button>
+        {isGestor && (
+          <button
+            onClick={() => onDelete(p)}
+            className="p-1.5 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition"
+            title="Excluir permanentemente"
+          >
+            <IconTrash size={14}/>
+          </button>
+        )}
+      </div>
     </div>
   );
 };
@@ -372,6 +411,7 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
 
   const [responsavelFilter, setResponsavelFilter] = React.useState(filterByResponsavel || 'todos');
   const [labelFilter, setLabelFilter] = React.useState('');
+  const [showArquivadas, setShowArquivadas] = React.useState(false);
   const [modal, setModal] = React.useState({ open: false, editing: null });
   const [draggingId, setDraggingId] = React.useState(null);
   const [dragOver, setDragOver] = React.useState(null);
@@ -387,8 +427,8 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
   }, []);
 
   const all = isGestor
-    ? store.pendencias
-    : store.pendencias.filter(p => p.responsavel_id === profile.id);
+    ? store.pendencias.filter(p => !p.arquivado)
+    : store.pendencias.filter(p => p.responsavel_id === profile.id && !p.arquivado);
   const byResp = (isGestor && responsavelFilter !== 'todos')
     ? all.filter(p => p.responsavel_id === responsavelFilter)
     : all;
@@ -397,6 +437,10 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
         pl => pl.pendencia_id === p.id && pl.label_id === labelFilter
       ))
     : byResp;
+
+  const arquivadas = isGestor
+    ? store.pendencias.filter(p => p.arquivado)
+    : store.pendencias.filter(p => p.responsavel_id === profile.id && p.arquivado);
 
   const cols = [
     { status: 'nao-concluido', label: 'Não Concluído', headerDot: 'bg-rose-500' },
@@ -459,10 +503,21 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
     }
   };
 
-  const onDelete = (p) => {
-    if (!confirmAction(`Excluir a pendência "${p.titulo}"?`)) return;
+  const onArchive = (p) => {
+    if (!confirmAction(`Arquivar a pendência "${p.titulo}"?`)) return;
+    api.archivarPendencia(p.id);
+    toast('Pendência arquivada.', 'info');
+  };
+
+  const onRestore = (p) => {
+    api.restaurarPendencia(p.id);
+    toast('Pendência restaurada.');
+  };
+
+  const onDeletePermanent = (p) => {
+    if (!confirmAction(`Excluir permanentemente "${p.titulo}"? Esta ação não pode ser desfeita.`)) return;
     api.deletePendencia(p.id);
-    toast('Pendência excluída.', 'info');
+    toast('Pendência excluída permanentemente.', 'info');
   };
 
   const onScroll = () => {
@@ -479,7 +534,7 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
         subtitle={isGestor ? 'Quadro de tarefas de toda a equipe.' : 'Suas tarefas, organizadas por status.'}
         right={
           <div className="flex items-center gap-2 flex-wrap">
-            {isGestor && (
+            {isGestor && !showArquivadas && (
               <Select value={responsavelFilter} onChange={(e) => setResponsavelFilter(e.target.value)}>
                 <option value="todos">Todos os responsáveis</option>
                 {store.profiles.filter(u => u.ativo).map(u =>
@@ -487,7 +542,7 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
                 )}
               </Select>
             )}
-            {(store.labels || []).length > 0 && (
+            {(store.labels || []).length > 0 && !showArquivadas && (
               <Select value={labelFilter} onChange={(e) => setLabelFilter(e.target.value)}>
                 <option value="">Todas as etiquetas</option>
                 {(store.labels || []).map(l =>
@@ -495,53 +550,93 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
                 )}
               </Select>
             )}
-            <Btn icon={<IconPlus size={16}/>} onClick={() => setModal({ open: true, editing: null })}>
-              Nova Pendência
-            </Btn>
+            <button
+              onClick={() => setShowArquivadas(v => !v)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border transition
+                ${showArquivadas
+                  ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400'
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+            >
+              <IconArchive size={14}/>
+              Arquivadas
+              {arquivadas.length > 0 && (
+                <span className="text-[10px] bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 px-1.5 py-0.5 rounded-full tabular-nums">
+                  {arquivadas.length}
+                </span>
+              )}
+            </button>
+            {!showArquivadas && (
+              <Btn icon={<IconPlus size={16}/>} onClick={() => setModal({ open: true, editing: null })}>
+                Nova Pendência
+              </Btn>
+            )}
           </div>
         }
       />
 
-      <div
-        ref={isMobile ? scrollRef : null}
-        onScroll={isMobile ? onScroll : undefined}
-        className={isMobile
-          ? 'flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4'
-          : 'grid grid-cols-3 gap-4'}
-      >
-        {cols.map((c, i) => (
-          <KanbanColumn
-            key={c.status}
-            status={c.status}
-            label={c.label}
-            headerDot={c.headerDot}
-            items={filtered.filter(p => p.status === c.status)
-                           .sort((a,b) => (a.ordem ?? 0) - (b.ordem ?? 0) || new Date(b.updated_at) - new Date(a.updated_at))}
-            onDragOver={setDragOver}
-            isOver={dragOver === c.status}
-            onDropTo={onDropTo}
-            onEdit={(p) => setModal({ open: true, editing: p })}
-            onDelete={onDelete}
-            canDelete={isGestor}
-            onDragStart={setDraggingId}
-            onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
-            dragging={false}
-            isMobile={isMobile}
-            colIndex={i}
-            onMove={onMoveCard}
-          />
-        ))}
-      </div>
-
-      {isMobile && (
-        <div className="flex items-center justify-center gap-2 mt-3">
-          {cols.map((_, i) => (
-            <span
-              key={i}
-              className={`w-2 h-2 rounded-full transition-colors ${i === activeCol ? 'bg-brand-600 dark:bg-brand-500' : 'bg-gray-300 dark:bg-gray-700'}`}
-            />
-          ))}
+      {showArquivadas ? (
+        <div className="space-y-2">
+          {arquivadas.length === 0 ? (
+            <div className="text-center text-sm text-gray-400 dark:text-gray-600 py-16 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl">
+              Nenhuma pendência arquivada.
+            </div>
+          ) : (
+            arquivadas.map(p => (
+              <ArchivedPendenciaCard
+                key={p.id}
+                p={p}
+                onRestore={onRestore}
+                onDelete={onDeletePermanent}
+                isGestor={isGestor}
+              />
+            ))
+          )}
         </div>
+      ) : (
+        <>
+          <div
+            ref={isMobile ? scrollRef : null}
+            onScroll={isMobile ? onScroll : undefined}
+            className={isMobile
+              ? 'flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4'
+              : 'grid grid-cols-3 gap-4'}
+          >
+            {cols.map((c, i) => (
+              <KanbanColumn
+                key={c.status}
+                status={c.status}
+                label={c.label}
+                headerDot={c.headerDot}
+                items={filtered.filter(p => p.status === c.status)
+                               .sort((a,b) => (a.ordem ?? 0) - (b.ordem ?? 0) || new Date(b.updated_at) - new Date(a.updated_at))}
+                onDragOver={setDragOver}
+                isOver={dragOver === c.status}
+                onDropTo={onDropTo}
+                onEdit={(p) => setModal({ open: true, editing: p })}
+                onArchive={onArchive}
+                canArchive={true}
+                onDragStart={setDraggingId}
+                onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
+                dragging={false}
+                isMobile={isMobile}
+                colIndex={i}
+                onMove={onMoveCard}
+              />
+            ))}
+          </div>
+
+          {isMobile && (
+            <div className="flex items-center justify-center gap-2 mt-3">
+              {cols.map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-2 h-2 rounded-full transition-colors ${i === activeCol ? 'bg-brand-600 dark:bg-brand-500' : 'bg-gray-300 dark:bg-gray-700'}`}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <PendenciaModal
