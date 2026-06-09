@@ -18,6 +18,9 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
   const overdue = isOverdue(p.prazo, p.status, 'concluido');
   const user = store.profiles.find(x => x.id === p.responsavel_id);
   const respName = user ? user.nome : p.responsavel;
+  const checklistItems = (store.checklistItems || []).filter(c => c.pendencia_id === p.id);
+  const checklistDone  = checklistItems.filter(c => c.concluido).length;
+  const checklistPct   = checklistItems.length ? (checklistDone / checklistItems.length) * 100 : 0;
 
   return (
     <div
@@ -49,6 +52,29 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
           </div>
         </div>
       </div>
+      {checklistItems.length > 0 && (
+        <div className="mt-2.5 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums">
+              {checklistDone}/{checklistItems.length} concluídos
+            </span>
+            {checklistPct === 100 && (
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">✓ Tudo feito</span>
+            )}
+          </div>
+          <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${checklistPct}%`,
+                background: checklistPct === 100
+                  ? 'var(--color-emerald-500, #10b981)'
+                  : 'var(--color-brand-500, #6366f1)',
+              }}
+            />
+          </div>
+        </div>
+      )}
       {isMobile ? (
         <div className="mt-2 flex items-center gap-2">
           <button
@@ -121,6 +147,20 @@ const PendenciaModal = ({ open, onClose, editing, profile, onSaved }) => {
     titulo: '', descricao: '', responsavel: profile.nome, responsavel_id: profile.id, prazo: '', urgente: false, status: 'nao-concluido',
   }));
   const [errors, setErrors] = React.useState({});
+  const [newChecklistText, setNewChecklistText] = React.useState('');
+  const checklistItems = editing
+    ? (store.checklistItems || [])
+        .filter(c => c.pendencia_id === editing.id)
+        .sort((a, b) => a.ordem - b.ordem || new Date(a.criado_em) - new Date(b.criado_em))
+    : [];
+  const checklistDone = checklistItems.filter(i => i.concluido).length;
+
+  const handleAddChecklistItem = async () => {
+    const text = newChecklistText.trim();
+    if (!text || !editing) return;
+    setNewChecklistText('');
+    await api.addChecklistItem(editing.id, text);
+  };
 
   React.useEffect(() => {
     if (open) {
@@ -191,6 +231,56 @@ const PendenciaModal = ({ open, onClose, editing, profile, onSaved }) => {
           <Textarea value={form.descricao} onChange={(e) => setForm(f => ({ ...f, descricao: e.target.value }))}
                     placeholder="Detalhes opcionais..."/>
         </div>
+        {editing && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label>Checklist</Label>
+              {checklistItems.length > 0 && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+                  {checklistDone}/{checklistItems.length}
+                </span>
+              )}
+            </div>
+            {checklistItems.length > 0 && (
+              <div className="space-y-0.5 mb-2 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {checklistItems.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-2.5 px-3 py-2 group/item hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={item.concluido}
+                      onChange={() => api.toggleChecklistItem(item.id)}
+                      className="w-4 h-4 shrink-0 rounded border-gray-300 dark:border-gray-600 accent-brand-600 cursor-pointer"
+                    />
+                    <span className={`flex-1 text-sm select-none ${item.concluido ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'}`}>
+                      {item.texto}
+                    </span>
+                    <button
+                      onClick={() => api.deleteChecklistItem(item.id)}
+                      className="opacity-0 group-hover/item:opacity-100 p-1 rounded text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all"
+                      title="Remover item"
+                    >
+                      <IconTrash size={12}/>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                value={newChecklistText}
+                onChange={(e) => setNewChecklistText(e.target.value)}
+                placeholder="Adicionar item ao checklist..."
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddChecklistItem(); } }}
+              />
+              <Btn kind="secondary" onClick={handleAddChecklistItem} disabled={!newChecklistText.trim()}>
+                <IconPlus size={14}/>
+              </Btn>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Responsável</Label>

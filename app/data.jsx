@@ -55,14 +55,15 @@ const saveCache = () => {
   try {
     const payload = {
       ts: Date.now(),
-      profiles:     _state.profiles,
-      pendencias:   _state.pendencias,
-      demandas:     _state.demandas,
-      historico:    _state.historico.slice(0, 50),
-      comentarios:  _state.comentarios,
-      anexos:       _state.anexos,
-      notificacoes: _state.notificacoes,
-      metas:        _state.metas,
+      profiles:        _state.profiles,
+      pendencias:      _state.pendencias,
+      demandas:        _state.demandas,
+      historico:       _state.historico.slice(0, 50),
+      comentarios:     _state.comentarios,
+      anexos:          _state.anexos,
+      notificacoes:    _state.notificacoes,
+      metas:           _state.metas,
+      checklistItems:  _state.checklistItems,
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
   } catch (_) {}
@@ -74,15 +75,16 @@ const loadCache = () => {
     if (!raw) return false;
     const payload = JSON.parse(raw);
     if (!payload?.ts || Date.now() - payload.ts > CACHE_TTL_MS) return false;
-    _state.profiles     = payload.profiles     || [];
-    _state.pendencias   = payload.pendencias   || [];
-    _state.demandas     = payload.demandas     || [];
-    _state.historico    = payload.historico    || [];
-    _state.comentarios  = payload.comentarios  || [];
-    _state.anexos       = payload.anexos       || [];
-    _state.notificacoes = payload.notificacoes || [];
-    _state.metas        = payload.metas        || [];
-    _state.loaded       = true;
+    _state.profiles        = payload.profiles        || [];
+    _state.pendencias      = payload.pendencias      || [];
+    _state.demandas        = payload.demandas        || [];
+    _state.historico       = payload.historico       || [];
+    _state.comentarios     = payload.comentarios     || [];
+    _state.anexos          = payload.anexos          || [];
+    _state.notificacoes    = payload.notificacoes    || [];
+    _state.metas           = payload.metas           || [];
+    _state.checklistItems  = payload.checklistItems  || [];
+    _state.loaded          = true;
     return true;
   } catch (_) { return false; }
 };
@@ -99,6 +101,7 @@ const _state = {
   anexos: [],
   notificacoes: [],
   metas: [],
+  checklistItems: [],
   loaded:    false,
   loadError: null,
 };
@@ -130,6 +133,7 @@ const loadAll = async () => {
       { data: anexos },
       { data: notificacoes },
       { data: metas },
+      { data: checklistItems },
     ] = await Promise.all([
       supabase.from('profiles').select('*').order('nome'),
       supabase.from('pendencias').select('*').order('updated_at', { ascending: false }),
@@ -139,17 +143,19 @@ const loadAll = async () => {
       supabase.from('demandas_anexos').select('*').order('criado_em', { ascending: false }),
       supabase.from('notificacoes').select('*').order('criado_em', { ascending: false }),
       supabase.from('equipe_metas').select('*').order('criado_em', { ascending: false }),
+      supabase.from('pendencias_checklist').select('*').order('ordem').order('criado_em'),
     ]);
 
-    _state.profiles   = (profiles   || []).map(p => ({ ...p, avatar: p.avatar_url || null }));
-    _state.pendencias = pendencias  || [];
-    _state.demandas   = demandas    || [];
-    _state.historico  = historico   || [];
-    _state.comentarios = comentarios || [];
-    _state.anexos     = anexos      || [];
-    _state.notificacoes = notificacoes || [];
-    _state.metas      = metas       || [];
-    _state.loaded     = true;
+    _state.profiles        = (profiles   || []).map(p => ({ ...p, avatar: p.avatar_url || null }));
+    _state.pendencias      = pendencias  || [];
+    _state.demandas        = demandas    || [];
+    _state.historico       = historico   || [];
+    _state.comentarios     = comentarios || [];
+    _state.anexos          = anexos      || [];
+    _state.notificacoes    = notificacoes || [];
+    _state.metas           = metas       || [];
+    _state.checklistItems  = checklistItems || [];
+    _state.loaded          = true;
     _emit();
     saveCache();
 
@@ -164,6 +170,7 @@ const loadAll = async () => {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'demandas_anexos' }, () => loadAll())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'notificacoes' }, () => loadAll())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'equipe_metas' }, () => loadAll())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'pendencias_checklist' }, () => api.loadChecklistItems())
         .subscribe();
     }
   } catch (err) {
@@ -489,6 +496,45 @@ const api = {
       console.error('Erro no updateMeta:', e);
       toast('Erro ao atualizar meta: ' + e.message, 'error');
     }
+  },
+
+  // pendencias_checklist
+  loadChecklistItems: async () => {
+    const { data } = await supabase.from('pendencias_checklist').select('*').order('ordem').order('criado_em');
+    if (data) { _state.checklistItems = data; _emit(); saveCache(); }
+  },
+
+  listChecklistItems: (pendenciaId) =>
+    (_state.checklistItems || [])
+      .filter(c => c.pendencia_id === pendenciaId)
+      .sort((a, b) => a.ordem - b.ordem || new Date(a.criado_em) - new Date(b.criado_em)),
+
+  addChecklistItem: async (pendencia_id, texto) => {
+    const ordem = (_state.checklistItems || []).filter(c => c.pendencia_id === pendencia_id).length;
+    const { data, error } = await supabase.from('pendencias_checklist')
+      .insert({ pendencia_id, texto, ordem }).select().single();
+    if (error) { toast('Erro ao adicionar item.', 'error'); return null; }
+    await api.loadChecklistItems();
+    return data;
+  },
+
+  toggleChecklistItem: async (id) => {
+    const item = (_state.checklistItems || []).find(c => c.id === id);
+    if (!item) return;
+    _state.checklistItems = _state.checklistItems.map(c =>
+      c.id === id ? { ...c, concluido: !c.concluido } : c
+    );
+    _emit();
+    const { error } = await supabase.from('pendencias_checklist')
+      .update({ concluido: !item.concluido }).eq('id', id);
+    if (error) { await api.loadChecklistItems(); toast('Erro ao atualizar item.', 'error'); }
+  },
+
+  deleteChecklistItem: async (id) => {
+    _state.checklistItems = (_state.checklistItems || []).filter(c => c.id !== id);
+    _emit();
+    const { error } = await supabase.from('pendencias_checklist').delete().eq('id', id);
+    if (error) { await api.loadChecklistItems(); toast('Erro ao excluir item.', 'error'); }
   },
 
   // system
