@@ -13,6 +13,24 @@ const useIsMobile = () => {
 
 const STATUS_ORDER = ['nao-concluido', 'em-andamento', 'concluido'];
 
+const LabelChip = ({ label, active, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all
+      ${onClick ? 'cursor-pointer' : 'cursor-default'}
+      ${active === undefined ? '' : active ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
+    style={{
+      backgroundColor: label.cor + '22',
+      color: label.cor,
+      border: active ? `1.5px solid ${label.cor}` : `1.5px solid transparent`,
+    }}
+  >
+    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: label.cor }}></span>
+    {label.nome}
+  </button>
+);
+
 const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd, dragging, isMobile, colIndex, onMove }) => {
   const store = useStore();
   const overdue = isOverdue(p.prazo, p.status, 'concluido');
@@ -21,9 +39,14 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
   const checklistItems = (store.checklistItems || []).filter(c => c.pendencia_id === p.id);
   const checklistDone  = checklistItems.filter(c => c.concluido).length;
   const checklistPct   = checklistItems.length ? (checklistDone / checklistItems.length) * 100 : 0;
+  const cardLabels = (_state.pendenciasLabels || [])
+    .filter(pl => pl.pendencia_id === p.id)
+    .map(pl => (_state.labels || []).find(l => l.id === pl.label_id))
+    .filter(Boolean);
 
   return (
     <div
+      data-pendencia-id={p.id}
       draggable
       onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; onDragStart(p.id); }}
       onDragEnd={onDragEnd}
@@ -40,6 +63,11 @@ const PendenciaCard = ({ p, onEdit, onDelete, canDelete, onDragStart, onDragEnd,
             {p.urgente && <Badge tone="red" icon={<IconBolt size={10}/>}>Urgente</Badge>}
           </div>
           {p.descricao && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{p.descricao}</p>}
+          {cardLabels.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {cardLabels.map(l => <LabelChip key={l.id} label={l} />)}
+            </div>
+          )}
           <div className="flex items-center justify-between mt-3">
             <div className="flex items-center gap-1.5 min-w-0">
               <Avatar name={respName} src={user?.avatar} size={20}/>
@@ -116,7 +144,7 @@ const KanbanColumn = ({ status, label, headerColor, headerDot, items, onDropTo, 
   <div
     onDragOver={(e) => { e.preventDefault(); onDragOver(status); }}
     onDragLeave={() => onDragOver(null)}
-    onDrop={(e) => { e.preventDefault(); onDropTo(status); }}
+    onDrop={(e) => { e.preventDefault(); onDropTo(status, e); }}
     className={`flex flex-col bg-gray-50/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-2xl min-h-[200px]
       ${isMobile ? 'min-w-[85vw] snap-start' : ''}
       ${isOver ? 'ns-drag-over' : ''}`}
@@ -281,6 +309,26 @@ const PendenciaModal = ({ open, onClose, editing, profile, onSaved }) => {
             </div>
           </div>
         )}
+        {editing && (store.labels || []).length > 0 && (
+          <div>
+            <Label>Etiquetas</Label>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {(store.labels || []).map(l => {
+                const active = (store.pendenciasLabels || []).some(
+                  pl => pl.pendencia_id === editing.id && pl.label_id === l.id
+                );
+                return (
+                  <LabelChip
+                    key={l.id}
+                    label={l}
+                    active={active}
+                    onClick={() => api.togglePendenciaLabel(editing.id, l.id)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Responsável</Label>
@@ -323,6 +371,7 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
   const isMobile = useIsMobile();
 
   const [responsavelFilter, setResponsavelFilter] = React.useState(filterByResponsavel || 'todos');
+  const [labelFilter, setLabelFilter] = React.useState('');
   const [modal, setModal] = React.useState({ open: false, editing: null });
   const [draggingId, setDraggingId] = React.useState(null);
   const [dragOver, setDragOver] = React.useState(null);
@@ -340,9 +389,14 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
   const all = isGestor
     ? store.pendencias
     : store.pendencias.filter(p => p.responsavel_id === profile.id);
-  const filtered = (isGestor && responsavelFilter !== 'todos')
+  const byResp = (isGestor && responsavelFilter !== 'todos')
     ? all.filter(p => p.responsavel_id === responsavelFilter)
     : all;
+  const filtered = labelFilter
+    ? byResp.filter(p => (store.pendenciasLabels || []).some(
+        pl => pl.pendencia_id === p.id && pl.label_id === labelFilter
+      ))
+    : byResp;
 
   const cols = [
     { status: 'nao-concluido', label: 'Não Concluído', headerDot: 'bg-rose-500' },
@@ -350,13 +404,41 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
     { status: 'concluido',     label: 'Concluído',      headerDot: 'bg-emerald-500' },
   ];
 
-  const onDropTo = (newStatus) => {
+  const onDropTo = (newStatus, e) => {
     setDragOver(null);
-    if (draggingId == null) return;
-    const p = store.pendencias.find(x => x.id === draggingId);
-    const prevStatus = p?.status;
+    const dragId = draggingId;
+    if (dragId == null) return;
     setDraggingId(null);
-    if (!p || p.status === newStatus) return;
+    const p = store.pendencias.find(x => x.id === dragId);
+    if (!p) return;
+
+    if (p.status === newStatus) {
+      const colEl = e.currentTarget;
+      const cards = Array.from(colEl.querySelectorAll('[data-pendencia-id]'));
+      const mouseY = e.clientY;
+      const colItems = filtered
+        .filter(x => x.status === newStatus)
+        .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0) || new Date(b.updated_at) - new Date(a.updated_at));
+      const dragOrigIdx = colItems.findIndex(x => x.id === dragId);
+
+      let insertIdx = colItems.length;
+      for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        if (mouseY < rect.top + rect.height / 2) { insertIdx = i; break; }
+      }
+
+      const adjustedInsert = insertIdx > dragOrigIdx ? insertIdx - 1 : insertIdx;
+      if (adjustedInsert === dragOrigIdx) return;
+
+      const newOrder = colItems.filter(x => x.id !== dragId);
+      newOrder.splice(adjustedInsert, 0, p);
+      newOrder.forEach((item, idx) => {
+        if ((item.ordem ?? 0) !== idx) api.reorderPendencia(item.id, idx);
+      });
+      return;
+    }
+
+    const prevStatus = p.status;
     api.updatePendencia(p.id, { status: newStatus });
     toast(`Movido para "${cols.find(c => c.status === newStatus).label}".`);
     if (newStatus === 'concluido' && prevStatus !== 'concluido') {
@@ -396,12 +478,20 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
         title="Minhas pendências"
         subtitle={isGestor ? 'Quadro de tarefas de toda a equipe.' : 'Suas tarefas, organizadas por status.'}
         right={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {isGestor && (
               <Select value={responsavelFilter} onChange={(e) => setResponsavelFilter(e.target.value)}>
                 <option value="todos">Todos os responsáveis</option>
                 {store.profiles.filter(u => u.ativo).map(u =>
                   <option key={u.id} value={u.id}>{u.nome}</option>
+                )}
+              </Select>
+            )}
+            {(store.labels || []).length > 0 && (
+              <Select value={labelFilter} onChange={(e) => setLabelFilter(e.target.value)}>
+                <option value="">Todas as etiquetas</option>
+                {(store.labels || []).map(l =>
+                  <option key={l.id} value={l.id}>{l.nome}</option>
                 )}
               </Select>
             )}
@@ -426,7 +516,7 @@ const Pendencias = ({ profile, filterByResponsavel }) => {
             label={c.label}
             headerDot={c.headerDot}
             items={filtered.filter(p => p.status === c.status)
-                           .sort((a,b) => (b.urgente?1:0) - (a.urgente?1:0) || new Date(b.updated_at) - new Date(a.updated_at))}
+                           .sort((a,b) => (a.ordem ?? 0) - (b.ordem ?? 0) || new Date(b.updated_at) - new Date(a.updated_at))}
             onDragOver={setDragOver}
             isOver={dragOver === c.status}
             onDropTo={onDropTo}

@@ -146,6 +146,111 @@ const UsuarioModal = ({ open, onClose, editing, profile }) => {
   );
 };
 
+const LABEL_PRESET_COLORS = [
+  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
+  '#f97316', '#eab308', '#22c55e', '#14b8a6',
+  '#06b6d4', '#3b82f6', '#64748b', '#78716c',
+];
+
+const LabelsManager = ({ profile }) => {
+  const store = useStore();
+  const [nome, setNome] = React.useState('');
+  const [cor, setCor] = React.useState('#6366f1');
+  const [saving, setSaving] = React.useState(false);
+
+  const labels = store.labels || [];
+
+  const handleCreate = async () => {
+    const n = nome.trim();
+    if (!n) return;
+    setSaving(true);
+    await api.createLabel(n, cor, profile);
+    setNome('');
+    setSaving(false);
+  };
+
+  const handleDelete = (id) => {
+    if (!confirmAction('Excluir esta etiqueta? Será removida de todas as pendências.')) return;
+    api.deleteLabel(id);
+  };
+
+  return (
+    <div className="mt-8">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Etiquetas</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Categorize pendências com chips coloridos.</p>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 space-y-4">
+        <div className="flex flex-wrap gap-2 min-h-[36px]">
+          {labels.length === 0 && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 italic">Nenhuma etiqueta cadastrada.</p>
+          )}
+          {labels.map(l => (
+            <span
+              key={l.id}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: l.cor + '22', color: l.cor, border: `1.5px solid ${l.cor}` }}
+            >
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: l.cor }}></span>
+              {l.nome}
+              <button
+                onClick={() => handleDelete(l.id)}
+                className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
+                title="Excluir etiqueta"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
+          <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Nova etiqueta</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreate(); } }}
+              placeholder="Nome da etiqueta..."
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 rounded-lg px-3 h-9 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 w-48"
+            />
+            <div className="flex items-center gap-1 flex-wrap">
+              {LABEL_PRESET_COLORS.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCor(c)}
+                  title={c}
+                  className={`w-6 h-6 rounded-full transition-all ${cor === c ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'}`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+            <Btn kind="primary" onClick={handleCreate} isLoading={saving} disabled={!nome.trim()}>
+              Adicionar
+            </Btn>
+          </div>
+          {nome.trim() && (
+            <div className="mt-2">
+              <span className="text-[11px] text-gray-500 dark:text-gray-400 mr-2">Preview:</span>
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: cor + '22', color: cor, border: `1.5px solid ${cor}` }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cor }}></span>
+                {nome.trim()}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Usuarios = ({ profile }) => {
   const store = useStore();
   const [modal, setModal] = React.useState({ open: false, editing: null });
@@ -255,6 +360,8 @@ const Usuarios = ({ profile }) => {
         </table>
         {filtered.length === 0 && <EmptyState title="Nenhum usuário encontrado." />}
       </div>
+
+      <LabelsManager profile={profile} />
 
       <UsuarioModal
         open={modal.open}

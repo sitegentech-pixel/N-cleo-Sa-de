@@ -62,8 +62,10 @@ const saveCache = () => {
       comentarios:     _state.comentarios,
       anexos:          _state.anexos,
       notificacoes:    _state.notificacoes,
-      metas:           _state.metas,
-      checklistItems:  _state.checklistItems,
+      metas:            _state.metas,
+      checklistItems:   _state.checklistItems,
+      labels:           _state.labels,
+      pendenciasLabels: _state.pendenciasLabels,
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
   } catch (_) {}
@@ -82,9 +84,11 @@ const loadCache = () => {
     _state.comentarios     = payload.comentarios     || [];
     _state.anexos          = payload.anexos          || [];
     _state.notificacoes    = payload.notificacoes    || [];
-    _state.metas           = payload.metas           || [];
-    _state.checklistItems  = payload.checklistItems  || [];
-    _state.loaded          = true;
+    _state.metas             = payload.metas             || [];
+    _state.checklistItems    = payload.checklistItems    || [];
+    _state.labels            = payload.labels            || [];
+    _state.pendenciasLabels  = payload.pendenciasLabels  || [];
+    _state.loaded            = true;
     return true;
   } catch (_) { return false; }
 };
@@ -102,6 +106,8 @@ const _state = {
   notificacoes: [],
   metas: [],
   checklistItems: [],
+  labels: [],
+  pendenciasLabels: [],
   loaded:    false,
   loadError: null,
 };
@@ -133,29 +139,42 @@ const loadAll = async () => {
       { data: anexos },
       { data: notificacoes },
       { data: metas },
-      { data: checklistItems },
     ] = await Promise.all([
       supabase.from('profiles').select('*').order('nome'),
-      supabase.from('pendencias').select('*').order('updated_at', { ascending: false }),
+      supabase.from('pendencias').select('*').order('ordem', { ascending: true }).order('updated_at', { ascending: false }),
       supabase.from('demandas').select('*').order('updated_at', { ascending: false }),
       supabase.from('demandas_historico').select('*').order('criado_em', { ascending: false }),
       supabase.from('demandas_comentarios').select('*').order('criado_em', { ascending: false }),
       supabase.from('demandas_anexos').select('*').order('criado_em', { ascending: false }),
       supabase.from('notificacoes').select('*').order('criado_em', { ascending: false }),
       supabase.from('equipe_metas').select('*').order('criado_em', { ascending: false }),
-      supabase.from('pendencias_checklist').select('*').order('ordem').order('criado_em'),
     ]);
+    _state.profiles     = (profiles   || []).map(p => ({ ...p, avatar: p.avatar_url || null }));
+    _state.pendencias   = pendencias  || [];
+    _state.demandas     = demandas    || [];
+    _state.historico    = historico   || [];
+    _state.comentarios  = comentarios || [];
+    _state.anexos       = anexos      || [];
+    _state.notificacoes = notificacoes || [];
+    _state.metas        = metas       || [];
+    _state.loaded       = true;
 
-    _state.profiles        = (profiles   || []).map(p => ({ ...p, avatar: p.avatar_url || null }));
-    _state.pendencias      = pendencias  || [];
-    _state.demandas        = demandas    || [];
-    _state.historico       = historico   || [];
-    _state.comentarios     = comentarios || [];
-    _state.anexos          = anexos      || [];
-    _state.notificacoes    = notificacoes || [];
-    _state.metas           = metas       || [];
-    _state.checklistItems  = checklistItems || [];
-    _state.loaded          = true;
+    try {
+      const { data: cl } = await supabase.from('pendencias_checklist').select('*').order('ordem').order('criado_em');
+      _state.checklistItems = cl || [];
+    } catch (_) { _state.checklistItems = []; }
+
+    try {
+      const [{ data: lblData }, { data: plData }] = await Promise.all([
+        supabase.from('labels').select('*').order('nome'),
+        supabase.from('pendencias_labels').select('*'),
+      ]);
+      _state.labels            = lblData || [];
+      _state.pendenciasLabels  = plData  || [];
+    } catch (_) {
+      _state.labels           = [];
+      _state.pendenciasLabels = [];
+    }
     _emit();
     saveCache();
 
@@ -171,6 +190,8 @@ const loadAll = async () => {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'notificacoes' }, () => loadAll())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'equipe_metas' }, () => loadAll())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'pendencias_checklist' }, () => api.loadChecklistItems())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'labels' }, () => api.loadLabels())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'pendencias_labels' }, () => api.loadLabels())
         .subscribe();
     }
   } catch (err) {
@@ -185,7 +206,7 @@ const loadAll = async () => {
 const api = {
   // Persistence Helpers
   loadPendencias: async () => {
-    const { data } = await supabase.from('pendencias').select('*').order('updated_at', { ascending: false });
+    const { data } = await supabase.from('pendencias').select('*').order('ordem', { ascending: true }).order('updated_at', { ascending: false });
     if (data) { _state.pendencias = data; _emit(); }
   },
   loadDemandas: async () => {
@@ -290,6 +311,13 @@ const api = {
     }
     await api.loadPendencias();
     return row;
+  },
+
+  reorderPendencia: async (id, novaOrdem) => {
+    _state.pendencias = _state.pendencias.map(p => p.id === id ? { ...p, ordem: novaOrdem } : p);
+    _emit();
+    const { error } = await supabase.from('pendencias').update({ ordem: novaOrdem }).eq('id', id);
+    if (error) { await api.loadPendencias(); toast('Erro ao reordenar.', 'error'); }
   },
 
   updatePendencia: async (id, patch) => {
@@ -535,6 +563,62 @@ const api = {
     _emit();
     const { error } = await supabase.from('pendencias_checklist').delete().eq('id', id);
     if (error) { await api.loadChecklistItems(); toast('Erro ao excluir item.', 'error'); }
+  },
+
+  // labels
+  loadLabels: async () => {
+    const [{ data: lblData }, { data: plData }] = await Promise.all([
+      supabase.from('labels').select('*').order('nome'),
+      supabase.from('pendencias_labels').select('*'),
+    ]);
+    _state.labels           = lblData || [];
+    _state.pendenciasLabels = plData  || [];
+    _emit();
+    saveCache();
+  },
+
+  listLabels: () => [...(_state.labels || [])],
+
+  listPendenciaLabels: (pendenciaId) =>
+    (_state.pendenciasLabels || [])
+      .filter(pl => pl.pendencia_id === pendenciaId)
+      .map(pl => (_state.labels || []).find(l => l.id === pl.label_id))
+      .filter(Boolean),
+
+  createLabel: async (nome, cor, profile) => {
+    const { data, error } = await supabase.from('labels')
+      .insert({ nome, cor, criado_por: profile.id }).select().single();
+    if (error) { toast('Erro ao criar etiqueta.', 'error'); return null; }
+    await api.loadLabels();
+    return data;
+  },
+
+  deleteLabel: async (id) => {
+    _state.labels           = (_state.labels           || []).filter(l  => l.id !== id);
+    _state.pendenciasLabels = (_state.pendenciasLabels || []).filter(pl => pl.label_id !== id);
+    _emit();
+    const { error } = await supabase.from('labels').delete().eq('id', id);
+    if (error) { await api.loadLabels(); toast('Erro ao excluir etiqueta.', 'error'); }
+  },
+
+  togglePendenciaLabel: async (pendencia_id, label_id) => {
+    const existing = (_state.pendenciasLabels || []).find(
+      pl => pl.pendencia_id === pendencia_id && pl.label_id === label_id
+    );
+    if (existing) {
+      _state.pendenciasLabels = _state.pendenciasLabels.filter(
+        pl => !(pl.pendencia_id === pendencia_id && pl.label_id === label_id)
+      );
+      _emit();
+      const { error } = await supabase.from('pendencias_labels')
+        .delete().eq('pendencia_id', pendencia_id).eq('label_id', label_id);
+      if (error) { await api.loadLabels(); toast('Erro ao remover etiqueta.', 'error'); }
+    } else {
+      _state.pendenciasLabels = [...(_state.pendenciasLabels || []), { pendencia_id, label_id }];
+      _emit();
+      const { error } = await supabase.from('pendencias_labels').insert({ pendencia_id, label_id });
+      if (error) { await api.loadLabels(); toast('Erro ao adicionar etiqueta.', 'error'); }
+    }
   },
 
   // system
