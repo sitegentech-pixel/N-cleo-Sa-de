@@ -149,6 +149,46 @@ const Modal = ({ open, onClose, title, subtitle, children, footer, size = 'md' }
   );
 };
 
+// ---------- Drawer (painel lateral deslizante) ----------
+const Drawer = ({ open, onClose, title, subtitle, children, footer, width = 420 }) => {
+  const [closing, setClosing] = React.useState(false);
+  const close = React.useCallback(() => {
+    setClosing(true);
+    setTimeout(() => { setClosing(false); onClose?.(); }, 160);
+  }, [onClose]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [open, close]);
+
+  if (!open) return null;
+  return (
+    <div className={`fixed inset-0 z-50 ${closing ? 'ns-fade-out' : 'ns-fade-in'}`}>
+      <div className="absolute inset-0 bg-slate-950/35 backdrop-blur-[2px]" onClick={close} />
+      <div
+        className={`absolute right-0 top-0 h-full w-full sm:w-auto bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-700 flex flex-col ${closing ? 'ns-slide-out' : 'ns-slide-in'}`}
+        style={{ maxWidth: '100vw', width: `min(${width}px, 100vw)` }}
+      >
+        <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight">{title}</h3>
+            {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{subtitle}</p>}
+          </div>
+          <button onClick={close} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0" aria-label="Fechar painel">
+            <IconClose size={18} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
+        {footer && <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40 shrink-0">{footer}</div>}
+      </div>
+    </div>
+  );
+};
+
 // ---------- Buttons ----------
 const Btn = (props) => {
   const kind = props.kind || 'primary';
@@ -440,6 +480,6 @@ const OnboardingTour = () => {
 
 Object.assign(window, {
   toast, ToastHost, Spinner, Badge, StatusBadgePend, StatusBadgeDem, Avatar,
-  EmptyState, Modal, Btn, Label, Input, Textarea, Select, Checkbox, FieldError,
+  EmptyState, Modal, Drawer, Btn, Label, Input, Textarea, Select, Checkbox, FieldError,
   SegTabs, confirmAction, GlobalSearch, KeyboardShortcuts, OnboardingTour
 });

@@ -66,6 +66,7 @@ const saveCache = () => {
       checklistItems:   _state.checklistItems,
       labels:           _state.labels,
       pendenciasLabels: _state.pendenciasLabels,
+      eventos:          _state.eventos,
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
   } catch (_) {}
@@ -88,6 +89,7 @@ const loadCache = () => {
     _state.checklistItems    = payload.checklistItems    || [];
     _state.labels            = payload.labels            || [];
     _state.pendenciasLabels  = payload.pendenciasLabels  || [];
+    _state.eventos           = payload.eventos           || [];
     _state.loaded            = true;
     return true;
   } catch (_) { return false; }
@@ -108,6 +110,7 @@ const _state = {
   checklistItems: [],
   labels: [],
   pendenciasLabels: [],
+  eventos: [],
   // workspace pessoal (lazy — carregado ao entrar na página)
   wsNotes: [],
   wsProjects: [],
@@ -183,6 +186,13 @@ const loadAll = async () => {
       _state.labels           = [];
       _state.pendenciasLabels = [];
     }
+
+    // eventos (tabela opcional — exige migration_eventos.sql)
+    try {
+      const { data: evData, error: evErr } = await supabase.from('eventos').select('*').order('data');
+      _state.eventos = evErr ? [] : (evData || []);
+    } catch (_) { _state.eventos = []; }
+
     _emit();
     saveCache();
 
@@ -200,6 +210,7 @@ const loadAll = async () => {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'pendencias_checklist' }, () => api.loadChecklistItems())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'labels' }, () => api.loadLabels())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'pendencias_labels' }, () => api.loadLabels())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'eventos' }, () => api.loadEventos())
         .subscribe();
     }
   } catch (err) {
@@ -638,6 +649,38 @@ const api = {
       const { error } = await supabase.from('pendencias_labels').insert({ pendencia_id, label_id });
       if (error) { await api.loadLabels(); toast('Erro ao adicionar etiqueta.', 'error'); }
     }
+  },
+
+  // ---------- eventos do calendário ----------
+  loadEventos: async () => {
+    try {
+      const { data, error } = await supabase.from('eventos').select('*').order('data');
+      if (!error && data) { _state.eventos = data; _emit(); saveCache(); }
+    } catch (_) {}
+  },
+
+  createEvento: async ({ titulo, data, tipo }, profile) => {
+    const { data: row, error } = await supabase.from('eventos')
+      .insert({ titulo, data, tipo, user_id: profile.id, criado_por: profile.nome })
+      .select().single();
+    if (error) {
+      const msg = /relation .* does not exist|schema cache/i.test(error.message || '')
+        ? 'Tabela de eventos não existe. Rode migration_eventos.sql no Supabase.'
+        : 'Erro ao criar evento.';
+      toast(msg, 'error');
+      return null;
+    }
+    _state.eventos = [..._state.eventos, row];
+    _emit();
+    saveCache();
+    return row;
+  },
+
+  deleteEvento: async (id) => {
+    _state.eventos = _state.eventos.filter(e => e.id !== id);
+    _emit();
+    const { error } = await supabase.from('eventos').delete().eq('id', id);
+    if (error) { await api.loadEventos(); toast('Erro ao excluir evento.', 'error'); }
   },
 
   // ---------- workspace pessoal ----------

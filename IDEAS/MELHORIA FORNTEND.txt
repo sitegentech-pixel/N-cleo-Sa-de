@@ -1,0 +1,278 @@
+# Evolução Front-End: Navegação, Calendário e Dashboard
+
+Estamos entrando em uma fase de refinamento da experiência do usuário (UX/UI).
+
+O foco desta tarefa NÃO é criar novas funcionalidades complexas de backend, mas sim melhorar significativamente a experiência visual, navegação e produtividade do usuário utilizando funcionalidades já existentes no sistema.
+
+---
+
+## PROBLEMA 1 — Redirecionamento inesperado para Dashboard
+
+Existe um comportamento onde, durante o uso normal da plataforma, o sistema ocasionalmente retorna sozinho para o Dashboard.
+
+### Objetivos
+
+* Identificar a causa raiz.
+* Verificar:
+
+  * re-renderizações indevidas
+  * refresh automático
+  * problemas de estado global
+  * problemas de autenticação
+  * problemas de sessão
+  * redirects automáticos
+  * listeners indevidos
+  * hooks de navegação
+
+### Entrega
+
+* Explicar exatamente o que causa o problema.
+* Corrigir sem afetar funcionalidades existentes.
+* Garantir estabilidade de navegação.
+
+---
+
+## PROBLEMA 2 — Estrutura de Navegação
+
+Atualmente grande parte da aplicação funciona como uma única tela dinâmica.
+
+Quero avaliar uma arquitetura mais organizada.
+
+### Objetivo
+
+Transformar as principais áreas em rotas reais.
+
+Exemplos:
+
+/dashboard
+
+/calendario
+
+/usuarios
+
+/pendencias
+
+/demandas
+
+/workspace
+
+/perfil
+
+/configuracoes
+
+---
+
+### Benefícios esperados
+
+* Melhor experiência de navegação.
+* URLs compartilháveis.
+* Melhor histórico do navegador.
+* Melhor organização do código.
+* Melhor SEO interno.
+* Melhor manutenção.
+
+---
+
+## EVOLUÇÃO DA TELA DE CALENDÁRIO
+
+A tela atual do calendário é muito básica.
+
+Quero transformá-la em um verdadeiro centro operacional.
+
+Não quero apenas visualizar datas.
+
+Quero interagir com o sistema através do calendário.
+
+---
+
+## Funcionalidades desejadas
+
+### Pendências
+
+Ao clicar em um dia:
+
+* visualizar pendências daquele dia
+* criar pendências
+* editar pendências
+* alterar status
+* concluir pendências
+
+Sem precisar sair da tela do calendário.
+
+---
+
+### Demandas
+
+Ao clicar em um dia:
+
+* visualizar demandas
+* criar demandas
+* editar demandas
+* reagendar demandas
+* acompanhar status
+
+---
+
+### Eventos
+
+Adicionar:
+
+* eventos pessoais
+* eventos da cooperativa
+* lembretes rápidos
+
+---
+
+### Indicadores Visuais
+
+Cada dia deve mostrar indicadores.
+
+Exemplos:
+
+* número de pendências
+* número de demandas
+* eventos cadastrados
+* itens atrasados
+
+Utilizar badges discretos.
+
+---
+
+### Experiência Visual
+
+Inspirar-se em:
+
+* Google Calendar
+* Notion Calendar
+* Linear
+
+Adicionar:
+
+* hover elegante
+* animações suaves
+* abertura lateral (drawer)
+* carregamento fluido
+
+Evitar:
+
+* modais excessivos
+* excesso de cliques
+
+---
+
+## Melhorias de Visualização
+
+Adicionar:
+
+### Visualização Mensal
+
+### Visualização Semanal
+
+### Visualização Diária
+
+Permitir alternância rápida.
+
+---
+
+### Painel Lateral
+
+Ao selecionar uma data:
+
+Abrir painel lateral contendo:
+
+* Pendências
+* Demandas
+* Eventos
+* Ações rápidas
+
+Sem trocar de página.
+
+---
+
+## DASHBOARD — Gráfico de Pendências
+
+O gráfico atual de "Pendências ao longo do tempo" está funcional, porém visualmente simples.
+
+Quero uma evolução focada em UX e Front-End.
+
+---
+
+### Objetivos
+
+Transformar o gráfico em algo mais profissional e agradável.
+
+---
+
+### Melhorias desejadas
+
+Adicionar:
+
+* tooltips ricos
+* animações suaves
+* zoom temporal
+* filtros rápidos
+* comparação de períodos
+
+---
+
+### Filtros
+
+Hoje
+7 dias
+30 dias
+90 dias
+Ano
+
+---
+
+### Indicadores adicionais
+
+Exibir:
+
+* pendências criadas
+* pendências concluídas
+* pendências atrasadas
+* taxa de conclusão
+
+---
+
+### Visual
+
+Inspirar-se em:
+
+* Linear Analytics
+* Stripe Dashboard
+* Vercel Analytics
+
+Características:
+
+* clean
+* elegante
+* profissional
+* sem excesso de informação
+
+---
+
+## Responsividade
+
+Validar todas as melhorias para:
+
+* Desktop
+* Tablet
+* Mobile
+
+---
+
+## Entrega
+
+1. Analisar implementação atual.
+2. Identificar limitações de UX.
+3. Propor melhorias sem aumentar complexidade para o usuário.
+4. Implementar navegação mais robusta.
+5. Transformar o calendário em uma central operacional.
+6. Modernizar os gráficos do Dashboard.
+7. Manter performance elevada.
+8. Não quebrar funcionalidades existentes.
+
+Prioridade máxima:
+Experiência fluida, produtividade e sensação de produto premium.

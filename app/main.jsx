@@ -32,6 +32,17 @@ const PAGE_TITLES = {
   perfil:      'Meu Perfil',
 };
 
+// ----- hash routing (#/dashboard, #/calendario, ...) -----
+const VALID_PAGES = Object.keys(PAGE_TITLES);
+const pageFromHash = () => {
+  const h = window.location.hash.replace(/^#\/?/, '').split('?')[0];
+  return VALID_PAGES.includes(h) ? h : 'dashboard';
+};
+const navigateHash = (id) => {
+  if (pageFromHash() === id) return;
+  window.location.hash = '/' + id;
+};
+
 const App = () => {
   const store = useStore();
 
@@ -39,6 +50,9 @@ const App = () => {
   const [profileId, setProfileId] = React.useState(null);
   const [authLoading, setAuthLoading] = React.useState(true);
   const profile = profileId ? store.profiles.find(p => p.id === profileId) : null;
+  // Ref mirror so the auth listener (registered once) can read the current value.
+  const profileIdRef = React.useRef(null);
+  React.useEffect(() => { profileIdRef.current = profileId; }, [profileId]);
 
   React.useEffect(() => {
     let active = true;
@@ -99,10 +113,15 @@ const App = () => {
           setAuthLoading(false);
         }
       } else if (event === 'SIGNED_IN' && session) {
+        // Supabase re-emite SIGNED_IN ao refocar a aba / revalidar o token.
+        // Se já é o mesmo usuário logado, não recarregar nem navegar —
+        // era isso que causava o retorno inesperado ao Dashboard.
+        if (profileIdRef.current === session.user.id) return;
+
         const user = session.user;
         let { data: profile } = await supabase
           .from('profiles').select('*').eq('id', user.id).single();
-        
+
         if (profile && !profile.ativo) {
           await supabase.auth.signOut();
           if (active) {
@@ -116,7 +135,7 @@ const App = () => {
           await loadAll();
           if (active) {
             setProfileId(profile.id);
-            setPage('dashboard');
+            navigateHash('dashboard');
           }
         }
       }
@@ -133,11 +152,30 @@ const App = () => {
     setProfileId(null);
   };
 
-  // ----- routing -----
-  const [page, setPage] = React.useState('dashboard');
+  // ----- routing (hash-based: URLs compartilháveis + histórico do navegador) -----
+  const [page, setPage] = React.useState(pageFromHash);
   const [pendFilter, setPendFilter] = React.useState(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [transitioning, setTransitioning] = React.useState(false);
+
+  React.useEffect(() => {
+    // Normalize URL on first load (so "/" shows "#/dashboard").
+    if (!window.location.hash) {
+      window.history.replaceState(null, '', '#/' + pageFromHash());
+    }
+    const onHash = () => {
+      const next = pageFromHash();
+      setTransitioning(true);
+      setTimeout(() => {
+        if (next !== 'pendencias') setPendFilter(null);
+        setPage(next);
+        setMobileOpen(false);
+        setTransitioning(false);
+      }, 120);
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
   // Counts for sidebar badges (role-aware)
   const sidebarCounts = React.useMemo(() => {
@@ -173,19 +211,15 @@ const App = () => {
   if (!profile) {
     return (
       <>
-        <Login onLogin={(p) => { setProfileId(p.id); setPage('dashboard'); }} />
+        <Login onLogin={(p) => { setProfileId(p.id); navigateHash('dashboard'); }} />
         <ToastHost />
       </>
     );
   }
 
   const handleNavigate = (id) => {
-    setTransitioning(true);
-    setTimeout(() => {
-      if (id !== 'pendencias') setPendFilter(null);
-      setPage(id);
-      setTransitioning(false);
-    }, 120);
+    if (id !== 'pendencias') setPendFilter(null);
+    navigateHash(id);
   };
 
   const renderPage = () => {
@@ -193,14 +227,14 @@ const App = () => {
       case 'dashboard':  return <Dashboard profile={profile} onNavigate={handleNavigate} />;
       case 'pendencias': return <Pendencias profile={profile} filterByResponsavel={pendFilter} />;
       case 'demandas':   return <Demandas profile={profile} />;
-      case 'equipe':      return <Equipe profile={profile} onOpenPendenciasFor={(nome) => { setPendFilter(nome); setPage('pendencias'); }} />;
+      case 'equipe':      return <Equipe profile={profile} onOpenPendenciasFor={(nome) => { setPendFilter(nome); navigateHash('pendencias'); }} />;
       case 'calendario':  return <CalendarioView profile={profile} />;
       case 'workspace':   return <Workspace profile={profile} />;
       case 'feedback':   return <Feedback profile={profile} />;
       case 'usuarios':
         if (profile.role !== 'gestor') return <Dashboard profile={profile} onNavigate={handleNavigate}/>;
         return <Usuarios profile={profile} />;
-      case 'perfil': return <Perfil profile={profile} onBack={() => setPage('dashboard')} />;
+      case 'perfil': return <Perfil profile={profile} onBack={() => navigateHash('dashboard')} />;
       default: return null;
     }
   };

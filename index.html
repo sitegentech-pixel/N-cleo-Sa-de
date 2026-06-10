@@ -96,10 +96,33 @@
       from { opacity: 0; }
       to   { opacity: 1; }
     }
+    @keyframes ns-fade-out {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+    @keyframes ns-slide-in {
+      from { transform: translateX(100%); }
+      to   { transform: translateX(0); }
+    }
+    @keyframes ns-slide-out {
+      from { transform: translateX(0); }
+      to   { transform: translateX(100%); }
+    }
 
-    .ns-toast-in { animation: ns-toast-in 200ms cubic-bezier(.2,.8,.2,1) both; }
-    .ns-pop-in   { animation: ns-pop-in   180ms cubic-bezier(.2,.8,.2,1) both; }
-    .ns-fade-in  { animation: ns-fade-in  150ms ease both; }
+    .ns-toast-in  { animation: ns-toast-in 200ms cubic-bezier(.2,.8,.2,1) both; }
+    .ns-pop-in    { animation: ns-pop-in   180ms cubic-bezier(.2,.8,.2,1) both; }
+    .ns-fade-in   { animation: ns-fade-in  150ms ease both; }
+    .ns-fade-out  { animation: ns-fade-out 160ms ease both; }
+    .ns-slide-in  { animation: ns-slide-in  240ms cubic-bezier(.2,.8,.2,1) both; }
+    .ns-slide-out { animation: ns-slide-out 160ms cubic-bezier(.4,0,.8,.4) both; }
+    @keyframes ns-chart-draw {
+      from { stroke-dashoffset: 1; }
+      to   { stroke-dashoffset: 0; }
+    }
+    .ns-chart-draw { animation: ns-chart-draw 900ms cubic-bezier(.4,0,.2,1) both; }
+    @media (prefers-reduced-motion: reduce) {
+      .ns-slide-in, .ns-slide-out, .ns-pop-in, .ns-fade-in, .ns-fade-out, .ns-toast-in, .ns-chart-draw { animation-duration: 1ms; }
+    }
 
     /* ---- misc ---- */
     * { box-sizing: border-box; }

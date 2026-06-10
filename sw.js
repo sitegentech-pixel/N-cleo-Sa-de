@@ -1,4 +1,4 @@
-const STATIC_CACHE = 'ns-static-v9';
+const STATIC_CACHE = 'ns-static-v10';
 const CDN_CACHE    = 'ns-cdn-v1';
 const API_CACHE    = 'ns-api-v1';
 const ALL_CACHES   = [STATIC_CACHE, CDN_CACHE, API_CACHE];

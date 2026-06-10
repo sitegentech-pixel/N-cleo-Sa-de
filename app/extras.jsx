@@ -107,154 +107,280 @@ const NotificationBell = ({ profile, onNavigate }) => {
   );
 };
 
-// ---------- Pendências chart ----------
-// Group pendencias by period; show stacked bars by status.
-const groupBy = (list, period) => {
-  const buckets = [];
+// ---------- Pendências chart (estilo Linear/Stripe) ----------
+const CHART_PERIODS = [
+  { value: 'hoje', label: 'Hoje'    },
+  { value: '7d',   label: '7 dias'  },
+  { value: '30d',  label: '30 dias' },
+  { value: '90d',  label: '90 dias' },
+  { value: 'ano',  label: 'Ano'     },
+];
+
+// Gera baldes de tempo para o período; offset=1 → período anterior (comparação).
+const chartBuckets = (period, offset = 0) => {
   const now = new Date();
-  now.setHours(0, 0, 0, 0);
+  const buckets = [];
+  const push = (start, end, label) =>
+    buckets.push({ start: start.getTime(), end: end.getTime(), label, criadas: 0, concluidas: 0 });
 
-  if (period === 'diario') {
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      buckets.push({
-        key,
-        label: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
-        items: []
-      });
+  if (period === 'hoje') {
+    const day = new Date(now); day.setHours(0, 0, 0, 0);
+    day.setDate(day.getDate() - offset);
+    for (let h = 0; h < 24; h += 2) {
+      const s = new Date(day); s.setHours(h);
+      const e = new Date(day); e.setHours(h + 2);
+      push(s, e, `${String(h).padStart(2, '0')}h`);
     }
-  } else if (period === 'semanal') {
-    for (let i = 7; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i * 7);
-      buckets.push({
-        key: `w-${i}`,
-        label: `S ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`,
-        start: d.getTime(),
-        items: []
-      });
+  } else if (period === '7d' || period === '30d') {
+    const n = period === '7d' ? 7 : 30;
+    for (let i = n - 1; i >= 0; i--) {
+      const s = new Date(now); s.setHours(0, 0, 0, 0); s.setDate(s.getDate() - i - offset * n);
+      const e = new Date(s); e.setDate(s.getDate() + 1);
+      push(s, e, s.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
     }
-  } else if (period === 'mensal') {
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      buckets.push({
-        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
-        label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
-        items: []
-      });
+  } else if (period === '90d') {
+    for (let i = 12; i >= 0; i--) {
+      const s = new Date(now); s.setHours(0, 0, 0, 0); s.setDate(s.getDate() - i * 7 - 6 - offset * 91);
+      const e = new Date(s); e.setDate(s.getDate() + 7);
+      push(s, e, s.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
     }
-  } else { // anual
-    for (let i = 3; i >= 0; i--) {
-      const y = now.getFullYear() - i;
-      buckets.push({
-        key: `${y}`,
-        label: `${y}`,
-        items: []
-      });
-    }
-  }
-
-  const getBucketKey = (iso) => {
-    if (!iso) return null;
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return null;
-
-    if (period === 'diario') {
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-    if (period === 'semanal') {
-      const t = d.getTime();
-      let bestIdx = -1;
-      for (let i = 0; i < buckets.length; i++) {
-        if (buckets[i].start <= t) bestIdx = i;
-      }
-      return bestIdx !== -1 ? buckets[bestIdx].key : null;
-    }
-    if (period === 'mensal') {
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    }
-    return `${d.getFullYear()}`;
-  };
-
-  for (const item of list) {
-    const isoDate = item.created_at || item.updated_at || item.criado_em;
-    const k = getBucketKey(isoDate);
-    if (k) {
-      const b = buckets.find(x => x.key === k);
-      if (b) b.items.push(item);
+  } else { // ano
+    for (let i = 11; i >= 0; i--) {
+      const s = new Date(now.getFullYear(), now.getMonth() - i - offset * 12, 1);
+      const e = new Date(s.getFullYear(), s.getMonth() + 1, 1);
+      push(s, e, s.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''));
     }
   }
   return buckets;
 };
 
+const fillChartBuckets = (buckets, items) => {
+  const t0 = buckets[0].start, t1 = buckets[buckets.length - 1].end;
+  let criadas = 0, concluidas = 0;
+  for (const it of items) {
+    const c = new Date(it.created_at || it.criado_em || it.updated_at).getTime();
+    if (c >= t0 && c < t1) {
+      criadas++;
+      const b = buckets.find(x => c >= x.start && c < x.end);
+      if (b) b.criadas++;
+    }
+    if (it.status === 'concluido') {
+      const u = new Date(it.updated_at || it.created_at).getTime();
+      if (u >= t0 && u < t1) {
+        concluidas++;
+        const b = buckets.find(x => u >= x.start && u < x.end);
+        if (b) b.concluidas++;
+      }
+    }
+  }
+  return { criadas, concluidas };
+};
+
+// Curva suave por beziers entre os pontos.
+const smoothPath = (pts) => {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+    const mx = (x0 + x1) / 2;
+    d += ` C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`;
+  }
+  return d;
+};
+
+const ChartKpi = ({ label, value, delta, tone }) => {
+  const tones = {
+    brand:   'text-gray-900 dark:text-gray-100',
+    green:   'text-emerald-600 dark:text-emerald-400',
+    red:     'text-rose-600 dark:text-rose-400',
+    neutral: 'text-gray-900 dark:text-gray-100',
+  };
+  return (
+    <div className="flex-1 min-w-[120px] px-4 py-3">
+      <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{label}</div>
+      <div className="flex items-baseline gap-2 mt-1">
+        <span className={`text-xl font-bold tabular-nums tracking-tight ${tones[tone] || tones.neutral}`}>{value}</span>
+        {delta != null && isFinite(delta) && (
+          <span className={`text-[10px] font-semibold tabular-nums inline-flex items-center gap-0.5 ${
+            delta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+          }`}>
+            {delta >= 0 ? '▲' : '▼'} {Math.abs(Math.round(delta))}%
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const PendChart = ({ items }) => {
-  const [period, setPeriod] = React.useState('semanal');
-  const buckets = groupBy(items, period);
-  const max = Math.max(1, ...buckets.map(b => b.items.length));
+  const [period, setPeriod] = React.useState('30d');
+  const [hover, setHover] = React.useState(null); // índice do balde
+  const plotRef = React.useRef(null);
 
-  const STAT = [
-    { key: 'concluido',     label: 'Concluído',      color: '#10b981' },
-    { key: 'em-andamento',  label: 'Em andamento',   color: '#f59e0b' },
-    { key: 'nao-concluido', label: 'Não concluído',  color: '#f43f5e' },
-  ];
+  const { buckets, kpi } = React.useMemo(() => {
+    const cur  = chartBuckets(period, 0);
+    const prev = chartBuckets(period, 1);
+    const curTotals  = fillChartBuckets(cur, items);
+    const prevTotals = fillChartBuckets(prev, items);
 
-  const total = items.length;
-  const totals = STAT.map(s => ({ ...s, count: items.filter(i => i.status === s.key).length }));
+    const now = Date.now();
+    const atrasadas = items.filter(p => p.prazo && new Date(p.prazo).getTime() < now && p.status !== 'concluido').length;
+    const taxa = curTotals.criadas > 0 ? Math.round((curTotals.concluidas / curTotals.criadas) * 100) : null;
+
+    const deltaOf = (c, p) => (p > 0 ? ((c - p) / p) * 100 : null);
+    return {
+      buckets: cur,
+      kpi: {
+        criadas:    { v: curTotals.criadas,    d: deltaOf(curTotals.criadas,    prevTotals.criadas) },
+        concluidas: { v: curTotals.concluidas, d: deltaOf(curTotals.concluidas, prevTotals.concluidas) },
+        atrasadas,
+        taxa,
+      },
+    };
+  }, [items, period]);
+
+  // ----- geometria do SVG -----
+  const W = 720, H = 180, PX = 6, PT = 12, PB = 6;
+  const n = buckets.length;
+  const maxV = Math.max(1, ...buckets.map(b => Math.max(b.criadas, b.concluidas)));
+  const xOf = (i) => PX + (i / Math.max(1, n - 1)) * (W - PX * 2);
+  const yOf = (v) => PT + (1 - v / maxV) * (H - PT - PB);
+
+  const ptsCriadas    = buckets.map((b, i) => [xOf(i), yOf(b.criadas)]);
+  const ptsConcluidas = buckets.map((b, i) => [xOf(i), yOf(b.concluidas)]);
+  const pathCriadas    = smoothPath(ptsCriadas);
+  const pathConcluidas = smoothPath(ptsConcluidas);
+  const areaConcluidas = pathConcluidas
+    ? `${pathConcluidas} L ${xOf(n - 1)} ${H - PB} L ${xOf(0)} ${H - PB} Z`
+    : '';
+
+  // rótulos do eixo X (≈6 visíveis)
+  const labelStep = Math.max(1, Math.ceil(n / 6));
+
+  const onMove = (e) => {
+    const el = plotRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const rel = (e.clientX - rect.left) / rect.width;
+    const idx = Math.min(n - 1, Math.max(0, Math.round(rel * (n - 1))));
+    setHover(idx);
+  };
+
+  const hb = hover != null ? buckets[hover] : null;
+  const hoverLeftPct = hover != null ? (xOf(hover) / W) * 100 : 0;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card overflow-hidden">
+      {/* header */}
       <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pendências ao longo do tempo</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Distribuição por status no período.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Criadas vs. concluídas, comparado ao período anterior.</p>
         </div>
-        <SegTabs value={period} onChange={setPeriod} items={[
-          { value: 'diario',  label: 'Diário'  },
-          { value: 'semanal', label: 'Semanal' },
-          { value: 'mensal',  label: 'Mensal'  },
-          { value: 'anual',   label: 'Anual'   },
-        ]}/>
+        <SegTabs value={period} onChange={(v) => { setPeriod(v); setHover(null); }} items={CHART_PERIODS} />
       </div>
 
-      <div className="px-5 pt-4 pb-2 flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
-        {totals.map(t => (
-          <span key={t.key} className="inline-flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm" style={{ background: t.color }}></span>
-            <span className="font-medium text-gray-700 dark:text-gray-300">{t.label}</span>
-            <span className="text-gray-400 dark:text-gray-500 tabular-nums">{t.count}</span>
-          </span>
-        ))}
-        <span className="ml-auto text-gray-400 dark:text-gray-500">Total: <span className="font-semibold text-gray-700 dark:text-gray-300 tabular-nums">{total}</span></span>
+      {/* KPIs */}
+      <div className="flex flex-wrap divide-x divide-gray-100 dark:divide-gray-700/60 border-b border-gray-100 dark:border-gray-700">
+        <ChartKpi label="Criadas"           value={kpi.criadas.v}    delta={kpi.criadas.d}    tone="neutral" />
+        <ChartKpi label="Concluídas"        value={kpi.concluidas.v} delta={kpi.concluidas.d} tone="green" />
+        <ChartKpi label="Atrasadas (hoje)"  value={kpi.atrasadas}    tone={kpi.atrasadas > 0 ? 'red' : 'neutral'} />
+        <ChartKpi label="Taxa de conclusão" value={kpi.taxa != null ? `${kpi.taxa}%` : '—'} tone="brand" />
       </div>
 
-      <div className="px-5 pb-5 pt-3">
-        <div className="flex items-end gap-2 h-44">
-          {buckets.map((b, i) => {
-            const counts = STAT.map(s => b.items.filter(it => it.status === s.key).length);
-            const heightPct = (b.items.length / max) * 100;
-            return (
-              <div key={i} className="h-full flex-1 flex flex-col items-center group">
-                <div className="h-[135px] w-full flex items-end justify-center mb-1.5">
-                  <div className="relative w-full max-w-[44px] flex flex-col-reverse rounded-md overflow-hidden bg-gray-50/80 dark:bg-gray-700/50 transition-all duration-300 hover:scale-[1.06] active:scale-95 cursor-pointer shadow-sm hover:shadow-md"
-                       style={{ height: `${Math.max(2, heightPct)}%`, minHeight: 4 }}>
-                    {STAT.map((s, j) => {
-                      const c = counts[j];
-                      if (c === 0) return null;
-                      return <div key={s.key} title={`${s.label}: ${c}`}
-                                  style={{ background: s.color, height: `${(c / b.items.length) * 100}%` }}
-                                  className="w-full transition-all duration-300 hover:brightness-[1.08]"></div>;
-                    })}
-                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 pointer-events-none shadow-pop tabular-nums whitespace-nowrap z-10">
-                      {b.items.length} {b.items.length === 1 ? 'item' : 'itens'}
-                    </div>
-                  </div>
+      {/* plot */}
+      <div className="px-4 pt-4 pb-2">
+        <div
+          ref={plotRef}
+          className="relative select-none cursor-crosshair"
+          onMouseMove={onMove}
+          onMouseLeave={() => setHover(null)}
+        >
+          <svg viewBox={`0 0 ${W} ${H}`} className="w-full block" style={{ height: 'clamp(140px, 24vw, 200px)' }} preserveAspectRatio="none">
+            {/* gridlines sutis */}
+            {[0.25, 0.5, 0.75].map(f => (
+              <line key={f} x1={PX} x2={W - PX} y1={PT + f * (H - PT - PB)} y2={PT + f * (H - PT - PB)}
+                    className="stroke-gray-100 dark:stroke-gray-700/50" strokeWidth="1" strokeDasharray="4 6" />
+            ))}
+            <line x1={PX} x2={W - PX} y1={H - PB} y2={H - PB} className="stroke-gray-200 dark:stroke-gray-700" strokeWidth="1" />
+
+            {/* área concluídas */}
+            <defs>
+              <linearGradient id="ns-grad-done" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"  stopColor="#10b981" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path key={`a-${period}`} d={areaConcluidas} fill="url(#ns-grad-done)" className="ns-fade-in" />
+
+            {/* linhas */}
+            <path key={`c-${period}`} d={pathCriadas} fill="none" stroke="#94a3b8" strokeWidth="1.75"
+                  strokeLinecap="round" pathLength="1" className="ns-chart-draw" strokeDasharray="1" />
+            <path key={`d-${period}`} d={pathConcluidas} fill="none" stroke="#10b981" strokeWidth="2.25"
+                  strokeLinecap="round" pathLength="1" className="ns-chart-draw" strokeDasharray="1" />
+
+            {/* guia + pontos do hover */}
+            {hb && (
+              <g>
+                <line x1={xOf(hover)} x2={xOf(hover)} y1={PT - 4} y2={H - PB}
+                      className="stroke-gray-300 dark:stroke-gray-600" strokeWidth="1" />
+                <circle cx={xOf(hover)} cy={yOf(hb.criadas)}    r="3.5" fill="#94a3b8" className="stroke-white dark:stroke-gray-800" strokeWidth="1.5" />
+                <circle cx={xOf(hover)} cy={yOf(hb.concluidas)} r="3.5" fill="#10b981" className="stroke-white dark:stroke-gray-800" strokeWidth="1.5" />
+              </g>
+            )}
+          </svg>
+
+          {/* tooltip rico */}
+          {hb && (
+            <div
+              className="ns-pop-in absolute top-0 pointer-events-none z-10"
+              style={{
+                left: `${hoverLeftPct}%`,
+                transform: hoverLeftPct > 70 ? 'translateX(calc(-100% - 10px))' : 'translateX(10px)',
+              }}
+            >
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-pop px-3 py-2 min-w-[130px]">
+                <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">{hb.label}</div>
+                <div className="flex items-center justify-between gap-4 text-xs">
+                  <span className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                    <span className="w-2 h-2 rounded-full bg-slate-400" /> Criadas
+                  </span>
+                  <span className="font-bold tabular-nums text-gray-900 dark:text-gray-100">{hb.criadas}</span>
                 </div>
-                <div className="text-[10px] text-gray-500 dark:text-gray-400 tracking-tight whitespace-nowrap">{b.label}</div>
+                <div className="flex items-center justify-between gap-4 text-xs mt-1">
+                  <span className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" /> Concluídas
+                  </span>
+                  <span className="font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{hb.concluidas}</span>
+                </div>
               </div>
-            );
-          })}
+            </div>
+          )}
+        </div>
+
+        {/* eixo X */}
+        <div className="flex justify-between px-1 mt-1.5">
+          {buckets.map((b, i) => (
+            <span
+              key={i}
+              className={`text-[10px] tabular-nums whitespace-nowrap transition-colors ${
+                hover === i ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-400 dark:text-gray-500'
+              } ${i % labelStep !== 0 && i !== n - 1 ? 'opacity-0' : ''}`}
+              style={{ width: `${100 / n}%`, textAlign: i === 0 ? 'left' : i === n - 1 ? 'right' : 'center' }}
+            >
+              {b.label}
+            </span>
+          ))}
+        </div>
+
+        {/* legenda */}
+        <div className="flex items-center gap-4 px-1 pt-2 pb-1">
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+            <span className="w-4 h-[2px] rounded bg-slate-400" /> Criadas
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+            <span className="w-4 h-[2px] rounded bg-emerald-500" /> Concluídas
+          </span>
         </div>
       </div>
     </div>
