@@ -56,27 +56,27 @@ const Perfil = ({ profile, onBack }) => {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-5 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 mb-5 transition-colors"
       >
         <Icon size={16}><path d="m15 18-6-6 6-6"/></Icon>
         Voltar
       </button>
 
       {/* Header */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-5 mb-4 flex items-center gap-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 mb-4 flex items-center gap-5">
         <Avatar name={profile.nome} src={profile.avatar} size={80} />
         <div className="min-w-0">
-          <h1 className="text-lg font-semibold text-gray-900 truncate">{profile.nome}</h1>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{profile.nome}</h1>
           <div className="mt-1.5">
             <Badge tone={roleTone}>{roleLabel}</Badge>
           </div>
-          <p className="text-sm text-gray-500 mt-1.5 truncate">{profile.email}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 truncate">{profile.email}</p>
         </div>
       </div>
 
       {/* Dados Pessoais */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-5 mb-4">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">Dados Pessoais</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 mb-4">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Dados Pessoais</h2>
         <div className="space-y-3">
           <div>
             <Label htmlFor="pf-nome">Nome</Label>
@@ -106,20 +106,20 @@ const Perfil = ({ profile, onBack }) => {
       </div>
 
       {/* Avatar */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-5 mb-4">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">Avatar</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 mb-4">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Avatar</h2>
         {window.AvatarUpload ? (
           <AvatarUpload profile={profile} size={72} />
         ) : (
           <div className="flex items-center gap-4">
             <Avatar name={profile.nome} src={profile.avatar} size={72} />
             <div>
-              <div className="text-sm font-medium text-gray-900">Foto de perfil</div>
-              <div className="text-xs text-gray-500 mt-0.5">PNG ou JPG, até 1,5 MB.</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Foto de perfil</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">PNG ou JPG, até 1,5 MB.</div>
               <input
                 type="file"
                 accept="image/*"
-                className="mt-2 text-xs text-gray-600"
+                className="mt-2 text-xs text-gray-600 dark:text-gray-300"
                 onChange={e => {
                   const file = e.target.files?.[0];
                   if (!file) return;
@@ -136,8 +136,8 @@ const Perfil = ({ profile, onBack }) => {
       </div>
 
       {/* Segurança */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-5 mb-4">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">Segurança</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 mb-4">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Segurança</h2>
         <div className="space-y-3">
           <div>
             <Label htmlFor="pf-pwd">Nova senha</Label>
@@ -169,34 +169,34 @@ const Perfil = ({ profile, onBack }) => {
       </div>
 
       {/* Minha Atividade */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-5 mb-4">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">Minha Atividade</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card p-5 mb-4">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Minha Atividade</h2>
         <div className="space-y-4">
           <div>
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Pendências</div>
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Pendências</div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Não concluído', count: pendCounts.nao, color: 'text-rose-600',    bg: 'bg-rose-50'    },
-                { label: 'Em andamento',  count: pendCounts.and, color: 'text-amber-600',   bg: 'bg-amber-50'   },
-                { label: 'Concluído',     count: pendCounts.ok,  color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                { label: 'Não concluído', count: pendCounts.nao, color: 'text-rose-600 dark:text-rose-400',       bg: 'bg-rose-50 dark:bg-rose-950/40'       },
+                { label: 'Em andamento',  count: pendCounts.and, color: 'text-amber-600 dark:text-amber-400',     bg: 'bg-amber-50 dark:bg-amber-950/40'     },
+                { label: 'Concluído',     count: pendCounts.ok,  color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40' },
               ].map(({ label, count, color, bg }) => (
                 <div key={label} className={`${bg} rounded-lg px-3 py-3 text-center`}>
                   <div className={`text-2xl font-bold tabular-nums ${color}`}>{count}</div>
-                  <div className="text-[11px] text-gray-600 mt-0.5 leading-tight">{label}</div>
+                  <div className="text-[11px] text-gray-600 dark:text-gray-300 mt-0.5 leading-tight">{label}</div>
                 </div>
               ))}
             </div>
           </div>
           <div>
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Demandas — últimos 30 dias</div>
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Demandas — últimos 30 dias</div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Abertas',    count: demCounts.abertas,    color: 'text-sky-600',     bg: 'bg-sky-50'     },
-                { label: 'Concluídas', count: demCounts.concluidas, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                { label: 'Abertas',    count: demCounts.abertas,    color: 'text-sky-600 dark:text-sky-400',         bg: 'bg-sky-50 dark:bg-sky-950/40'         },
+                { label: 'Concluídas', count: demCounts.concluidas, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40' },
               ].map(({ label, count, color, bg }) => (
                 <div key={label} className={`${bg} rounded-lg px-3 py-3 text-center`}>
                   <div className={`text-2xl font-bold tabular-nums ${color}`}>{count}</div>
-                  <div className="text-[11px] text-gray-600 mt-0.5">{label}</div>
+                  <div className="text-[11px] text-gray-600 dark:text-gray-300 mt-0.5">{label}</div>
                 </div>
               ))}
             </div>

@@ -26,6 +26,7 @@ const PAGE_TITLES = {
   demandas:    'Demandas',
   equipe:      'Equipe',
   calendario:  'Calendário',
+  workspace:   'Meu Workspace',
   feedback:    'Feedback',
   usuarios:    'Usuários',
   perfil:      'Meu Perfil',
@@ -194,6 +195,7 @@ const App = () => {
       case 'demandas':   return <Demandas profile={profile} />;
       case 'equipe':      return <Equipe profile={profile} onOpenPendenciasFor={(nome) => { setPendFilter(nome); setPage('pendencias'); }} />;
       case 'calendario':  return <CalendarioView profile={profile} />;
+      case 'workspace':   return <Workspace profile={profile} />;
       case 'feedback':   return <Feedback profile={profile} />;
       case 'usuarios':
         if (profile.role !== 'gestor') return <Dashboard profile={profile} onNavigate={handleNavigate}/>;

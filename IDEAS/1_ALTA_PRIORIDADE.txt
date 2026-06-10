@@ -1,0 +1,122 @@
+========================================================
+  IDEIAS — ALTA PRIORIDADE (sentidas no dia a dia)
+  Inspirado no Trello · Núcleo Saúde Gestão · PB
+========================================================
+
+────────────────────────────────────────────────────────
+IDEIA 1 — Quick-Add Inline no Kanban
+────────────────────────────────────────────────────────
+O que é:
+  Botão "+ Adicionar card" no rodapé de cada coluna do kanban.
+  Clique abre um input pequeno inline (sem modal), usuário digita
+  o título, pressiona Enter → card criado na coluna. Idêntico ao Trello.
+
+Por que agora:
+  Hoje criar pendência exige abrir modal completo. Para tarefas rápidas
+  isso quebra o fluxo. Quick-add reduz o atrito e aumenta o uso do sistema.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  No arquivo app/pendencias.jsx, adicione um componente QuickAddCard
+  ao rodapé de cada KanbanColumn. Ele deve ter: um botão "+ Adicionar card"
+  que quando clicado vira um textarea/input simples com botão "Adicionar"
+  e botão "✕" para cancelar. Ao confirmar, chama api.createPendencia com
+  { titulo: valor, status: coluna_atual, responsavel: profile.nome,
+  responsavel_id: profile.id }. Pressionar Enter salva, Escape cancela.
+  Não usar modal — tudo inline dentro da coluna.
+
+────────────────────────────────────────────────────────
+IDEIA 2 — Checklist dentro do Card de Pendência
+────────────────────────────────────────────────────────
+O que é:
+  Sub-tarefas com checkbox dentro de cada pendência. Ex:
+    [x] Ligar pro fornecedor
+    [x] Enviar documento
+    [ ] Aguardar confirmação
+  Progresso aparece no card do kanban como "2/3" ou barra mini.
+
+Por que agora:
+  Era a feature mais usada do Trello. Pendências complexas precisam
+  de sub-passos. Hoje só existe título + descrição (texto livre).
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Criar tabela Supabase: pendencias_checklist(id uuid PK, pendencia_id uuid FK,
+     texto text, concluido boolean default false, ordem int, criado_em timestamptz).
+  2. Em app/data.jsx, adicionar ao loadAll() fetch de pendencias_checklist.
+     Adicionar api.addChecklistItem(pendencia_id, texto), api.toggleChecklistItem(id),
+     api.deleteChecklistItem(id).
+  3. Em app/pendencias.jsx no PendenciaModal (aba Detalhes), abaixo da descrição
+     adicionar seção "Checklist" com lista de itens, checkbox toggle, botão
+     adicionar item, botão excluir item.
+  4. No PendenciaCard (card do kanban), se checklist existir mostrar no rodapé:
+     uma mini barra de progresso e texto "X/Y" concluídos.
+
+────────────────────────────────────────────────────────
+IDEIA 3 — Comentários em Pendências
+────────────────────────────────────────────────────────
+O que é:
+  Aba "Comentários" dentro do modal de edição de Pendência,
+  igual ao que já existe em Demandas. Com @menção, avatares,
+  chat-style (mensagem própria à direita, outros à esquerda).
+
+Por que agora:
+  Demandas têm comentários mas Pendências não. A equipe vai querer
+  discutir tarefas dentro do sistema em vez de usar WhatsApp.
+  Paridade total com Demandas.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Criar tabela Supabase: pendencias_comentarios(id uuid PK,
+     pendencia_id uuid FK, autor_id uuid FK, texto text,
+     criado_em timestamptz default now()).
+  2. Em app/data.jsx: adicionar fetch de pendencias_comentarios no loadAll(),
+     adicionar api.listComentariosPend(pendencia_id) e
+     api.createComentarioPend(pendencia_id, texto, profile) com suporte
+     a @menções (mesmo padrão de demandas_comentarios).
+  3. Em app/pendencias.jsx no PendenciaModal: transformar footer em SegTabs
+     com abas "Detalhes" e "Comentários" (igual DemandaModal).
+     Aba Comentários: copiar o bloco de UI de comentários de app/demandas.jsx
+     adaptando para pendencia_id. Incluir autocomplete de @menção.
+
+────────────────────────────────────────────────────────
+IDEIA 4 — Reordenar Cards Dentro da Coluna
+────────────────────────────────────────────────────────
+O que é:
+  Drag-and-drop hoje só muda de coluna. No Trello também reordena
+  dentro da mesma coluna. Adicionar campo ordem e atualizar posição
+  ao soltar o card.
+
+Por que agora:
+  Sem ordem manual, as tarefas ficam sempre por updated_at. A equipe
+  não consegue priorizar visualmente quais fazer primeiro dentro de
+  cada coluna.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Adicionar coluna `ordem int default 0` na tabela pendencias do Supabase.
+  2. Em app/data.jsx: api.reorderPendencia(id, novaOrdem) que faz update do campo ordem.
+  3. Em app/pendencias.jsx: no KanbanColumn, trocar o onDrop para detectar
+     se o card foi solto na mesma coluna (mesmo status) — se sim, calcular
+     nova posição baseado na posição Y do mouse relativo aos outros cards,
+     chamar api.reorderPendencia. Se coluna diferente, manter lógica atual.
+     Ordenar items por campo ordem ASC ao renderizar cada coluna.
+
+────────────────────────────────────────────────────────
+IDEIA 5 — Etiquetas Coloridas (Labels)
+────────────────────────────────────────────────────────
+O que é:
+  Tags coloridas customizáveis por card. Ex: "Financeiro 🔵",
+  "Administrativo 🟢", "Jurídico 🔴", "RH 🟡". Gestor cria labels,
+  cooperados aplicam nos cards. Visível no kanban como chips coloridos.
+
+Por que agora:
+  Sistema só tem flag binária "urgente". No Trello labels eram
+  essenciais para categorizar e filtrar rapidamente por tipo de tarefa.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Criar tabela Supabase: labels(id uuid PK, nome text, cor text, criado_por uuid FK).
+     Criar tabela: pendencias_labels(pendencia_id uuid, label_id uuid, PRIMARY KEY ambos).
+  2. Em app/data.jsx: carregar labels no loadAll(), api.createLabel(nome, cor),
+     api.deleteLabel(id), api.togglePendenciaLabel(pendencia_id, label_id).
+  3. Em app/pendencias.jsx: no PendenciaModal adicionar seção "Etiquetas" com
+     lista de labels disponíveis (chips coloridos clicáveis, selecionados ficam
+     com borda destacada). No PendenciaCard mostrar os chips coloridos abaixo do título.
+     No header do Kanban adicionar filtro por label.
+  4. Gestor gerencia labels em Usuários ou nova sub-seção de configurações.

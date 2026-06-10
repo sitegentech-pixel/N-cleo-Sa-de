@@ -107,6 +107,24 @@
 
     /* ---- page transition ---- */
     main { transition: opacity 120ms ease; }
+
+    /* ---- workspace pessoal ---- */
+    .ws-note {
+      transform: rotate(var(--ws-rot, 0deg));
+      transition: transform 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease;
+    }
+    .ws-note:hover { transform: rotate(0deg) translateY(-3px) scale(1.02); }
+    @keyframes ws-clip-in {
+      0%   { opacity: 0; transform: translateY(-10px) rotate(-30deg); }
+      60%  { opacity: 1; transform: translateY(2px) rotate(8deg); }
+      100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+    }
+    .ws-clip { animation: ws-clip-in 350ms cubic-bezier(.34,1.56,.64,1) both; }
+    .ws-canvas svg {
+      display: block; touch-action: none;
+      background-image: radial-gradient(circle, rgba(100,116,139,.22) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
   </style>
 </head>
 <body>
@@ -125,6 +143,7 @@
   <script src="./dist/app/demandas.js"></script>
   <script src="./dist/app/equipe.js"></script>
   <script src="./dist/app/calendario.js"></script>
+  <script src="./dist/app/workspace.js"></script>
   <script src="./dist/app/feedback.js"></script>
   <script src="./dist/app/usuarios.js"></script>
   <script src="./dist/app/perfil.js"></script>

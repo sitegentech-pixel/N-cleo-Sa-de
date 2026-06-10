@@ -1,0 +1,46 @@
+========================================================
+  ÍNDICE DE IDEIAS — Núcleo Saúde Gestão
+  Sistema de gestão da cooperativa · João Pessoa, PB
+========================================================
+
+Cada arquivo contém: descrição da ideia + prompt pronto
+para implementação com Claude Code.
+
+────────────────────────────────────────────────────────
+1_ALTA_PRIORIDADE.txt  (5 ideias)
+────────────────────────────────────────────────────────
+  #1  Quick-Add Inline no Kanban        ← mais fácil de implementar
+  #2  Checklist dentro do Card          ← mais sentido no dia a dia
+  #3  Comentários em Pendências         ← paridade com Demandas
+  #4  Reordenar Cards na Coluna         ← drag-drop completo
+  #5  Etiquetas Coloridas (Labels)      ← categorização visual
+
+────────────────────────────────────────────────────────
+2_MEDIA_PRIORIDADE.txt  (7 ideias)
+────────────────────────────────────────────────────────
+  #6  Calendário (Pendências+Demandas)
+  #7  Duplicar Card
+  #8  Arquivar ao Invés de Excluir
+  #9  Kanban para Demandas
+  #10 Filtro Rápido no Kanban (chips)
+  #11 Estimativa de Horas por Card
+  #12 Watch / Seguir Card
+
+────────────────────────────────────────────────────────
+3_COOPERATIVA_ESPECIFICA.txt  (8 ideias)
+────────────────────────────────────────────────────────
+  #13 Tarefas Recorrentes
+  #14 Relatório Exportável (PDF/CSV)
+  #15 Workload Visual na Equipe
+  #16 Notificações Push (PWA)
+  #17 Dashboard Individual por Cooperado
+  #18 Modo Foco (Minha Fila do Dia)
+  #19 Histórico de Status em Pendências
+  #20 Integração WhatsApp (Urgentes)
+
+========================================================
+COMO USAR:
+  Abra o arquivo de ideia desejada, copie o bloco
+  "PROMPT DE IMPLEMENTAÇÃO" e cole no Claude Code.
+  O prompt foi escrito com contexto completo do projeto.
+========================================================

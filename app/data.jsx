@@ -108,6 +108,14 @@ const _state = {
   checklistItems: [],
   labels: [],
   pendenciasLabels: [],
+  // workspace pessoal (lazy — carregado ao entrar na página)
+  wsNotes: [],
+  wsProjects: [],
+  wsTasks: [],
+  wsFlows: [],
+  wsKnowledge: [],
+  wsShares: [],
+  wsLoaded: false,
   loaded:    false,
   loadError: null,
 };
@@ -255,15 +263,18 @@ const api = {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          // Max size 256x256 for avatars
-          const size = Math.min(img.width, img.height, 256);
-          canvas.width = size;
-          canvas.height = size;
+          // Center-crop the full square then downscale — never crop a small
+          // window out of a large photo (that caused extreme zoom on mobile).
+          const side = Math.min(img.width, img.height);
+          const out  = Math.min(side, 256);
+          canvas.width  = out;
+          canvas.height = out;
           const ctx = canvas.getContext('2d');
-          // Crop center
-          const sx = (img.width - size) / 2;
-          const sy = (img.height - size) / 2;
-          ctx.drawImage(img, sx, sy, size, size, 0, 0, size, size);
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          const sx = (img.width  - side) / 2;
+          const sy = (img.height - side) / 2;
+          ctx.drawImage(img, sx, sy, side, side, 0, 0, out, out);
           canvas.toBlob(b => resolve(b), 'image/jpeg', 0.9);
         };
         img.onerror = () => reject(new Error("Falha ao processar imagem"));
@@ -627,6 +638,195 @@ const api = {
       const { error } = await supabase.from('pendencias_labels').insert({ pendencia_id, label_id });
       if (error) { await api.loadLabels(); toast('Erro ao adicionar etiqueta.', 'error'); }
     }
+  },
+
+  // ---------- workspace pessoal ----------
+  loadWorkspace: async () => {
+    try {
+      const [
+        { data: notes },
+        { data: projects },
+        { data: tasks },
+        { data: flows },
+        { data: knowledge },
+        { data: shares },
+      ] = await Promise.all([
+        supabase.from('ws_notes').select('*').order('fixada', { ascending: false }).order('atualizado_em', { ascending: false }),
+        supabase.from('ws_projects').select('*').order('atualizado_em', { ascending: false }),
+        supabase.from('ws_tasks').select('*').order('ordem').order('criado_em'),
+        supabase.from('ws_flows').select('*').order('atualizado_em', { ascending: false }),
+        supabase.from('ws_knowledge').select('*').order('categoria').order('atualizado_em', { ascending: false }),
+        supabase.from('ws_shares').select('*'),
+      ]);
+      _state.wsNotes     = notes     || [];
+      _state.wsProjects  = projects  || [];
+      _state.wsTasks     = tasks     || [];
+      _state.wsFlows     = flows     || [];
+      _state.wsKnowledge = knowledge || [];
+      _state.wsShares    = shares    || [];
+      _state.wsLoaded    = true;
+      _emit();
+
+      if (!api._wsRealtimeSubscribed) {
+        api._wsRealtimeSubscribed = true;
+        supabase.channel('ns-workspace')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ws_notes'     }, () => api.loadWorkspace())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ws_projects'  }, () => api.loadWorkspace())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ws_tasks'     }, () => api.loadWorkspace())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ws_flows'     }, () => api.loadWorkspace())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ws_knowledge' }, () => api.loadWorkspace())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ws_shares'    }, () => api.loadWorkspace())
+          .subscribe();
+      }
+      return true;
+    } catch (e) {
+      console.error('Erro ao carregar workspace:', e);
+      return false;
+    }
+  },
+
+  // notas
+  createNote: async (data, profile) => {
+    const payload = { user_id: profile.id, ...data };
+    const { data: row, error } = await supabase.from('ws_notes').insert(payload).select().single();
+    if (error) { toast('Erro ao criar nota.', 'error'); return null; }
+    _state.wsNotes = [row, ..._state.wsNotes];
+    _emit();
+    return row;
+  },
+
+  updateNote: async (id, patch) => {
+    _state.wsNotes = _state.wsNotes.map(n => n.id === id ? { ...n, ...patch, atualizado_em: new Date().toISOString() } : n);
+    _emit();
+    const { error } = await supabase.from('ws_notes').update({ ...patch, atualizado_em: new Date().toISOString() }).eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao salvar nota.', 'error'); }
+  },
+
+  deleteNote: async (id) => {
+    _state.wsNotes = _state.wsNotes.filter(n => n.id !== id);
+    _emit();
+    const { error } = await supabase.from('ws_notes').delete().eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao excluir nota.', 'error'); }
+  },
+
+  // projetos
+  createWsProject: async (data, profile) => {
+    const { data: row, error } = await supabase.from('ws_projects').insert({ user_id: profile.id, ...data }).select().single();
+    if (error) { toast('Erro ao criar projeto.', 'error'); return null; }
+    _state.wsProjects = [row, ..._state.wsProjects];
+    _emit();
+    return row;
+  },
+
+  updateWsProject: async (id, patch) => {
+    _state.wsProjects = _state.wsProjects.map(p => p.id === id ? { ...p, ...patch } : p);
+    _emit();
+    const { error } = await supabase.from('ws_projects').update({ ...patch, atualizado_em: new Date().toISOString() }).eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao salvar projeto.', 'error'); }
+  },
+
+  deleteWsProject: async (id) => {
+    _state.wsProjects = _state.wsProjects.filter(p => p.id !== id);
+    _state.wsTasks    = _state.wsTasks.filter(t => t.project_id !== id);
+    _emit();
+    const { error } = await supabase.from('ws_projects').delete().eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao excluir projeto.', 'error'); }
+  },
+
+  // tarefas
+  createWsTask: async (data, profile) => {
+    const ordem = _state.wsTasks.filter(t => t.project_id === data.project_id && t.status === (data.status || 'backlog')).length;
+    const { data: row, error } = await supabase.from('ws_tasks').insert({ user_id: profile.id, ordem, ...data }).select().single();
+    if (error) { toast('Erro ao criar tarefa.', 'error'); return null; }
+    _state.wsTasks = [..._state.wsTasks, row];
+    _emit();
+    return row;
+  },
+
+  updateWsTask: async (id, patch) => {
+    _state.wsTasks = _state.wsTasks.map(t => t.id === id ? { ...t, ...patch } : t);
+    _emit();
+    const { error } = await supabase.from('ws_tasks').update({ ...patch, atualizado_em: new Date().toISOString() }).eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao mover tarefa.', 'error'); }
+  },
+
+  deleteWsTask: async (id) => {
+    _state.wsTasks = _state.wsTasks.filter(t => t.id !== id);
+    _emit();
+    const { error } = await supabase.from('ws_tasks').delete().eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao excluir tarefa.', 'error'); }
+  },
+
+  // fluxos
+  createFlow: async (nome, profile) => {
+    const { data: row, error } = await supabase.from('ws_flows').insert({ user_id: profile.id, nome }).select().single();
+    if (error) { toast('Erro ao criar fluxo.', 'error'); return null; }
+    _state.wsFlows = [row, ..._state.wsFlows];
+    _emit();
+    return row;
+  },
+
+  updateFlow: async (id, patch) => {
+    _state.wsFlows = _state.wsFlows.map(f => f.id === id ? { ...f, ...patch } : f);
+    _emit();
+    const { error } = await supabase.from('ws_flows').update({ ...patch, atualizado_em: new Date().toISOString() }).eq('id', id);
+    if (error) { toast('Erro ao salvar fluxo.', 'error'); }
+  },
+
+  deleteFlow: async (id) => {
+    _state.wsFlows = _state.wsFlows.filter(f => f.id !== id);
+    _emit();
+    const { error } = await supabase.from('ws_flows').delete().eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao excluir fluxo.', 'error'); }
+  },
+
+  // conhecimento
+  createKnowledge: async (data, profile) => {
+    const { data: row, error } = await supabase.from('ws_knowledge').insert({ user_id: profile.id, ...data }).select().single();
+    if (error) { toast('Erro ao criar card.', 'error'); return null; }
+    _state.wsKnowledge = [row, ..._state.wsKnowledge];
+    _emit();
+    return row;
+  },
+
+  updateKnowledge: async (id, patch) => {
+    _state.wsKnowledge = _state.wsKnowledge.map(k => k.id === id ? { ...k, ...patch } : k);
+    _emit();
+    const { error } = await supabase.from('ws_knowledge').update({ ...patch, atualizado_em: new Date().toISOString() }).eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao salvar card.', 'error'); }
+  },
+
+  deleteKnowledge: async (id) => {
+    _state.wsKnowledge = _state.wsKnowledge.filter(k => k.id !== id);
+    _emit();
+    const { error } = await supabase.from('ws_knowledge').delete().eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao excluir card.', 'error'); }
+  },
+
+  // compartilhamento
+  listShares: (tipo, recursoId) =>
+    _state.wsShares.filter(s => s.tipo === tipo && s.recurso_id === recursoId),
+
+  sharePermissionFor: (tipo, recursoId, profile) => {
+    const s = _state.wsShares.find(x => x.tipo === tipo && x.recurso_id === recursoId && x.usuario_id === profile.id);
+    return s ? s.permissao : null;
+  },
+
+  createShare: async (tipo, recursoId, usuarioId, permissao, profile) => {
+    const { data: row, error } = await supabase.from('ws_shares')
+      .upsert({ tipo, recurso_id: recursoId, owner_id: profile.id, usuario_id: usuarioId, permissao }, { onConflict: 'tipo,recurso_id,usuario_id' })
+      .select().single();
+    if (error) { toast('Erro ao compartilhar.', 'error'); return null; }
+    _state.wsShares = [..._state.wsShares.filter(s => s.id !== row.id), row];
+    _emit();
+    return row;
+  },
+
+  deleteShare: async (id) => {
+    _state.wsShares = _state.wsShares.filter(s => s.id !== id);
+    _emit();
+    const { error } = await supabase.from('ws_shares').delete().eq('id', id);
+    if (error) { await api.loadWorkspace(); toast('Erro ao remover acesso.', 'error'); }
   },
 
   // system

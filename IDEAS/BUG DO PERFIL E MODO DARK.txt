@@ -1,0 +1,56 @@
+Precisamos corrigir alguns bugs de UI/UX já existentes no sistema. Não crie novas funcionalidades, apenas identifique a causa e aplique as correções necessárias.
+
+## BUG 1 — Foto de Perfil
+
+Atualmente, ao alterar a foto de perfil, principalmente em dispositivos móveis, mas também em alguns navegadores desktop, a imagem pode ficar com zoom excessivo, corte incorreto ou comportamento inconsistente após o upload.
+
+Objetivos:
+
+- Corrigir o comportamento do preview da foto.
+- Garantir que a imagem mantenha proporção adequada.
+- Evitar zoom excessivo ou infinito.
+- Garantir funcionamento consistente em mobile e desktop.
+- Verificar componentes de upload, crop, preview e renderização.
+- Utilizar object-fit adequado (cover ou contain quando necessário).
+- Garantir que imagens horizontais, verticais e quadradas sejam exibidas corretamente.
+- Testar em diferentes resoluções e tamanhos de tela.
+- Melhorar a experiência do usuário durante a seleção da imagem.
+
+## BUG 2 — Modo Dark
+
+Existem telas onde o Dark Mode está inconsistente.
+
+Telas identificadas:
+
+- Tela de Usuários
+- Tela de Perfil
+
+Problemas encontrados:
+
+- Fundos permanecem brancos no modo escuro.
+- Alguns textos ficam ilegíveis.
+- Cards e componentes não seguem o tema ativo.
+- Inputs, tabelas, modais e áreas de conteúdo apresentam cores incorretas.
+
+Objetivos:
+
+- Revisar toda a implementação do tema.
+- Garantir compatibilidade total com Light e Dark Mode.
+- Remover cores fixas hardcoded.
+- Utilizar tokens, variáveis CSS ou classes do tema já existente.
+- Garantir contraste adequado para acessibilidade.
+- Padronizar componentes para respeitarem automaticamente o tema ativo.
+
+## Entrega
+
+Quero que você:
+
+1. Localize a causa raiz dos problemas.
+2. Liste os arquivos que precisam ser alterados.
+3. Explique o que está causando cada bug.
+4. Implemente a correção seguindo as melhores práticas.
+5. Verifique possíveis regressões.
+6. Garanta funcionamento em desktop e mobile.
+7. Não altere funcionalidades existentes além do necessário para corrigir os bugs.
+
+Prioridade: estabilidade, consistência visual e experiência do usuário.

@@ -1,0 +1,155 @@
+========================================================
+  IDEIAS — MÉDIA PRIORIDADE (melhora fluxo geral)
+  Inspirado no Trello · Núcleo Saúde Gestão · PB
+========================================================
+
+────────────────────────────────────────────────────────
+IDEIA 6 — View de Calendário (Pendências + Demandas)
+────────────────────────────────────────────────────────
+O que é:
+  Tela de calendário mensal mostrando pendências e demandas
+  organizadas por data de prazo. Clique no dia abre lista de itens.
+  Toggle para ver "Meus" ou "Equipe toda" (gestor).
+
+Por que agora:
+  Trello tinha Power-Up de calendário muito usado. Equipes precisam
+  ver o que vence quando, não só lista linear. Prazos espalhados no
+  mês ficam invisíveis na tabela.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/extras.jsx ou novo arquivo app/calendario.jsx, criar componente
+  CalendarioView que recebe pendencias e demandas do store. Renderizar
+  grade 7x5 do mês atual com navegação prev/next. Para cada dia, mostrar
+  chips coloridos (verde=pendência, azul=demanda) com o título truncado.
+  Clicar no dia abre popover/modal com lista completa do dia.
+  Adicionar como nova tela no main.jsx (case 'calendario') e item no
+  sidebar com ícone de calendário. Incluir filtro "Meus / Todos" no header.
+
+────────────────────────────────────────────────────────
+IDEIA 7 — Duplicar Card
+────────────────────────────────────────────────────────
+O que é:
+  Botão "Duplicar" no card ou no modal cria cópia com título
+  "Cópia de [título original]", mesmo responsável, mesmo prazo,
+  status reiniciado para "nao-concluido".
+
+Por que agora:
+  Tarefas repetitivas parecidas (ex: relatório semanal, reunião
+  quinzenal) precisam ser criadas várias vezes. Duplicar poupa tempo.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/pendencias.jsx, no menu de ações do PendenciaCard (botões que
+  aparecem no hover) adicionar botão de duplicar com ícone de cópia.
+  Ao clicar, chamar api.createPendencia com os dados do card atual
+  exceto id, criado_em, updated_at — e título prefixado com "Cópia de ".
+  Status sempre "nao-concluido". Mostrar toast "Card duplicado." após criação.
+
+────────────────────────────────────────────────────────
+IDEIA 8 — Arquivar ao Invés de Excluir
+────────────────────────────────────────────────────────
+O que é:
+  Botão excluir vira "Arquivar". Card some do board mas fica no banco.
+  Gestor pode ver cards arquivados em painel separado e restaurar.
+  Exclusão permanente vira ação secundária dentro dos arquivados.
+
+Por que agora:
+  Trello arquiva, nunca deleta direto. Equipe vai excluir cards por
+  acidente e não terá como recuperar. Arquivamento protege histórico
+  da cooperativa.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Adicionar coluna `arquivado boolean default false` na tabela pendencias.
+  2. Em app/data.jsx: api.archivarPendencia(id) faz update { arquivado: true }.
+     api.restaurarPendencia(id) faz update { arquivado: false }.
+     Filtrar pendencias do store para excluir arquivadas por padrão no kanban.
+  3. Em app/pendencias.jsx: trocar botão "Excluir" por "Arquivar" com ícone
+     de caixa. Adicionar toggle no header "Mostrar arquivadas" que quando ativo
+     exibe lista flat (não kanban) dos cards arquivados com botão Restaurar
+     e botão Excluir Permanente (apenas gestor).
+
+────────────────────────────────────────────────────────
+IDEIA 9 — Kanban para Demandas
+────────────────────────────────────────────────────────
+O que é:
+  Toggle "Vista Kanban" na tela de Demandas. Hoje só existe tabela.
+  4 colunas: Aberta → Em Andamento → Concluída → Cancelada.
+  Drag-and-drop igual ao das Pendências.
+
+Por que agora:
+  No Trello, tudo era Kanban. Equipe vem acostumada com esse visual.
+  Tabela é boa para filtrar, mas Kanban dá visão de fluxo de trabalho.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/demandas.jsx, adicionar state `view: 'tabela' | 'kanban'` e
+  toggle de icones no header (ícone de lista / ícone de colunas).
+  Quando view='kanban', renderizar 4 KanbanColumn reutilizando o componente
+  de app/pendencias.jsx (ou criar DemandaCard similar ao PendenciaCard).
+  Drag-and-drop muda d.status igual ao das pendências, chamando api.updateDemanda.
+  Apenas gestor pode mover. Funcionário vê kanban mas sem drag.
+
+────────────────────────────────────────────────────────
+IDEIA 10 — Filtro Rápido no Kanban (chips no header)
+────────────────────────────────────────────────────────
+O que é:
+  Linha de filtros acima do kanban com chips clicáveis:
+  [Todos] [Urgentes] [Meus] [Vencidos] [Sem prazo]
+  Toggle instantâneo sem dropdown. Combináveis entre si.
+
+Por que agora:
+  Hoje o único filtro no kanban é o select de responsável (gestor).
+  Funcionários não têm filtro nenhum. Chips são rápidos e visuais.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/pendencias.jsx, acima do grid de colunas adicionar uma linha
+  de FilterChip components. State: Set de filtros ativos. Lógica de filtro:
+  "Urgentes" = p.urgente true, "Meus" = p.responsavel_id === profile.id,
+  "Vencidos" = isOverdue(p.prazo, p.status, 'concluido'),
+  "Sem prazo" = !p.prazo. Filtros combinam com AND.
+  Chips inativos: bg-gray-100, ativos: bg-brand-100 text-brand-700 ring-1.
+  Mostrar contagem em cada chip: "Urgentes (3)".
+
+────────────────────────────────────────────────────────
+IDEIA 11 — Estimativa de Horas por Card
+────────────────────────────────────────────────────────
+O que é:
+  Campo opcional "Estimativa" (número de horas) no modal de pendência.
+  Dashboard do gestor mostra total de horas planejadas por cooperado
+  esta semana. Indica sobrecarga antes de atribuir nova tarefa.
+
+Por que agora:
+  Cooperativa precisa distribuir carga justa. Hoje gestor não tem como
+  saber se alguém está sobrecarregado sem abrir card a card.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Adicionar coluna `horas_estimadas numeric(5,1)` na tabela pendencias.
+  2. Em app/pendencias.jsx no PendenciaModal adicionar campo Input type="number"
+     step="0.5" min="0" "Estimativa (horas)" opcional.
+  3. Em app/equipe.jsx, nos cards de cada cooperado, adicionar linha
+     "X,X h estimadas esta semana" somando horas de pendências ativas.
+     Colorir: <8h verde, 8-16h amarelo, >16h vermelho.
+  4. Em app/dashboard.jsx no RelatorioView, adicionar card de "Carga Semanal"
+     com ranking de horas por pessoa.
+
+────────────────────────────────────────────────────────
+IDEIA 12 — Watch / Seguir Card
+────────────────────────────────────────────────────────
+O que é:
+  Botão "Seguir" em demandas/pendências. Qualquer cooperado pode seguir
+  um card (não só o responsável). Recebe notificação quando status mudar
+  ou comentário for adicionado.
+
+Por que agora:
+  Gestor quer acompanhar progresso sem ser o responsável direto.
+  Funcionário quer saber quando tarefa relacionada à sua for concluída.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Criar tabela Supabase: card_watchers(id uuid PK, card_id uuid,
+     card_tipo text CHECK('pendencia','demanda'), usuario_id uuid FK,
+     UNIQUE(card_id, card_tipo, usuario_id)).
+  2. Em app/data.jsx: api.toggleWatch(card_id, card_tipo, usuario_id),
+     api.isWatching(card_id, card_tipo, usuario_id).
+  3. Nos modais de Demanda e Pendência, botão "👁 Seguir / Seguindo" no header
+     do modal. Toggle visual com estado.
+  4. Nas funções de notificação em data.jsx, ao atualizar status ou criar
+     comentário, inserir notificação do tipo 'watcher' para todos os watchers
+     do card além do responsável.

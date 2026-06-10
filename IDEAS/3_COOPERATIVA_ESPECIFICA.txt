@@ -1,0 +1,184 @@
+========================================================
+  IDEIAS — ESPECÍFICAS PARA A COOPERATIVA (PB)
+  Funcionalidades únicas ao contexto da Núcleo Saúde
+========================================================
+
+────────────────────────────────────────────────────────
+IDEIA 13 — Tarefas Recorrentes
+────────────────────────────────────────────────────────
+O que é:
+  Pendência com flag de recorrência: Diária, Semanal, Mensal.
+  Quando concluída, o sistema gera automaticamente nova pendência
+  idêntica para o próximo período. Ex: "Relatório semanal de produção"
+  aparece todo domingo às 00h já criada para a semana seguinte.
+
+Por que agora:
+  Cooperativa tem rotinas fixas. Hoje alguém precisa criar manualmente
+  toda semana as mesmas tarefas. Recorrência automatiza isso.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Adicionar colunas na tabela pendencias: recorrente boolean default false,
+     recorrencia_tipo text CHECK('diario','semanal','mensal'), recorrencia_pai uuid FK.
+  2. Em app/data.jsx: ao chamar api.updatePendencia com status 'concluido',
+     verificar se p.recorrente === true. Se sim, chamar api.createPendencia com
+     dados do pai (exceto id, status, created_at) e prazo calculado para próximo
+     período (hoje+1 dia, hoje+7, hoje+30).
+  3. Em app/pendencias.jsx no PendenciaModal, adicionar Checkbox "Tarefa recorrente"
+     e Select de frequência que aparece quando marcado. Cards recorrentes
+     mostram ícone de loop ♻ no kanban.
+
+────────────────────────────────────────────────────────
+IDEIA 14 — Relatório Exportável (PDF / CSV)
+────────────────────────────────────────────────────────
+O que é:
+  Botão "Exportar" no Dashboard (aba Relatório, gestor only).
+  Gera PDF ou CSV com: pendências por cooperado, demandas concluídas
+  no período, taxa de cumprimento de metas, ranking de produtividade.
+  Útil para reuniões e prestação de contas da cooperativa.
+
+Por que agora:
+  Cooperativas precisam de relatórios para assembleias, auditorias
+  e gestão interna. Dados já existem no sistema, falta só exportar.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/dashboard.jsx no RelatorioView, adicionar botão "Exportar CSV"
+  que usa JavaScript puro para gerar um Blob de texto CSV com headers:
+  Nome, Pendências Concluídas, Pendências Ativas, Demandas Concluídas,
+  Demandas Ativas, Taxa Conclusão %, Horas Estimadas.
+  Usar URL.createObjectURL para download automático do arquivo.
+  Nome do arquivo: "relatorio-nucleo-[mes]-[ano].csv".
+  Para PDF, usar window.print() com CSS @media print que esconde sidebar
+  e botões, mostrando apenas a tabela de relatório formatada.
+
+────────────────────────────────────────────────────────
+IDEIA 15 — Workload Visual na Tela de Equipe
+────────────────────────────────────────────────────────
+O que é:
+  Nos cards da tela Equipe, além dos contadores, mostrar barra de
+  "carga de trabalho" colorida baseada em tarefas ativas + urgência.
+  Verde (leve) → Amarelo (moderado) → Vermelho (sobrecarregado).
+  Gestor vê de um olhar quem tem capacidade para novas tarefas.
+
+Por que agora:
+  Distribuição justa de tarefas é problema real em cooperativas.
+  Hoje gestor não sabe quem está sobrecarregado sem abrir cada card.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/equipe.jsx, criar função calcWorkload(userId, pendencias) que
+  retorna score: soma de (tarefas ativas * 1) + (urgentes * 2) + (vencidas * 3).
+  Score 0-5: verde/leve, 6-12: amarelo/moderado, 13+: vermelho/sobrecarregado.
+  No card de cada cooperado, substituir ou complementar a barra de progresso
+  com uma barra de carga colorida e label "Carga: Leve / Moderada / Alta".
+  Adicionar tooltip explicando o cálculo ao hover na barra.
+
+────────────────────────────────────────────────────────
+IDEIA 16 — Notificações Push (PWA)
+────────────────────────────────────────────────────────
+O que é:
+  Pedir permissão de notificação push ao usuário. Quando prazo vencer
+  ou demanda for atribuída, o cooperado recebe alerta mesmo com o
+  app fechado (funciona via Service Worker já existente em sw.js).
+
+Por que agora:
+  Cooperados passam o dia no campo ou em atendimentos. Não ficam com
+  a aba aberta. Push notification é a única forma de garantir que
+  verão alertas urgentes sem depender de WhatsApp.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/main.jsx, após login bem-sucedido, verificar
+  Notification.permission. Se 'default', após 10s mostrar toast com
+  botão "Ativar notificações" que chama Notification.requestPermission().
+  Em app/data.jsx, na função notificationsFor quando encontrar item urgente
+  ou vencido novo (comparar com Set de ids já notificados em sessionStorage),
+  criar new Notification(titulo, { body, icon: '/icon-192.png' }).
+  Salvar ids notificados para não repetir. Checar via setInterval de 60s
+  ou ao receber evento realtime do Supabase.
+
+────────────────────────────────────────────────────────
+IDEIA 17 — Dashboard Individual por Cooperado
+────────────────────────────────────────────────────────
+O que é:
+  Gestor clica no card de um cooperado na tela Equipe e abre uma tela
+  de detalhes daquele cooperado: histórico de conclusões por semana,
+  taxa de cumprimento de prazo, média de dias para concluir,
+  últimas 10 tarefas concluídas, demandas atuais.
+
+Por que agora:
+  Tela Equipe atual mostra snapshot presente. Gestor de cooperativa
+  precisa de histórico para reuniões de avaliação individual.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/equipe.jsx, tornar o card do cooperado clicável. Ao clicar,
+  abrir Modal size="xl" com CooperadoDetalhe component que recebe userId.
+  Renderizar: cabeçalho com foto + nome + role, seguido de 4 CountCards
+  (concluídas esta semana, em andamento, vencidas, total histórico),
+  gráfico de barras semanal (reutilizar PendChart filtrado por responsavel_id),
+  lista das últimas 10 pendências concluídas com data, e lista de demandas ativas.
+  Todos os dados vêm do store já carregado, sem nova query necessária.
+
+────────────────────────────────────────────────────────
+IDEIA 18 — Modo Foco (Minha Fila do Dia)
+────────────────────────────────────────────────────────
+O que é:
+  Botão "Modo Foco" no Dashboard. Mostra apenas as tarefas do usuário
+  que vencem hoje ou estão marcadas como urgentes, em tela limpa sem
+  sidebar. Uma tarefa de cada vez. Foco máximo.
+
+Por que agora:
+  Cooperados com muitas tarefas ficam perdidos no kanban completo.
+  Modo foco elimina distração e direciona atenção para o que é urgente.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  Em app/main.jsx, adicionar state focusMode: boolean e renderizar
+  quando true um componente FocusMode fullscreen que recebe as pendências
+  do profile atual filtradas por (urgente OR prazo === hoje) ordenadas por
+  prazo ASC. Mostrar uma card grande por vez com botão "Concluir" que chama
+  api.updatePendencia e avança para próxima. Botão "Sair do foco" no canto.
+  Entrar pelo botão no Dashboard header ou atalho de teclado 'F'.
+
+────────────────────────────────────────────────────────
+IDEIA 19 — Histórico de Status em Pendências
+────────────────────────────────────────────────────────
+O que é:
+  Linha do tempo dentro do modal de pendência mostrando quando o card
+  mudou de status. Ex: "Criado por Ana · 10/06" → "Movido para Em Andamento
+  por João · 11/06" → "Concluído por João · 12/06".
+  Igual ao histórico que já existe em Demandas.
+
+Por que agora:
+  Demandas têm histórico detalhado mas Pendências não guardam nenhum rastro.
+  Para auditoria e acompanhamento em cooperativas isso é essencial.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Criar tabela Supabase: pendencias_historico(id uuid PK, pendencia_id uuid FK,
+     usuario_id uuid FK, usuario_nome text, campo text, valor_antigo text,
+     valor_novo text, criado_em timestamptz default now()).
+  2. Em app/data.jsx: em api.updatePendencia, antes do update detectar campos
+     alterados (status, responsavel, prazo, urgente) e inserir linha em
+     pendencias_historico para cada campo mudado — mesmo padrão de updateDemanda.
+     Carregar pendencias_historico no loadAll(), adicionar api.listHistoricoPend(id).
+  3. Em app/pendencias.jsx no PendenciaModal, adicionar aba "Histórico" no SegTabs
+     (junto com Detalhes e Comentários). Renderizar timeline igual à de Demandas.
+
+────────────────────────────────────────────────────────
+IDEIA 20 — Integração com WhatsApp (Notificação Urgente)
+────────────────────────────────────────────────────────
+O que é:
+  Quando gestor marca demanda/pendência como URGENTE, sistema envia
+  mensagem via WhatsApp API (Evolution API ou Twilio) para o responsável:
+  "⚠️ [Núcleo Saúde] Nova tarefa URGENTE atribuída a você: [título]. Prazo: [data]."
+
+Por que agora:
+  Cooperativa na Paraíba usa WhatsApp extensivamente. Urgências precisam
+  de canal garantido fora do sistema. Push notification falha se sem internet.
+
+PROMPT DE IMPLEMENTAÇÃO:
+  1. Criar Supabase Edge Function (app/supabase/functions/notify-whatsapp/index.ts)
+     que recebe { telefone, mensagem } e chama API de WhatsApp escolhida
+     (Ex: Evolution API self-hosted ou Twilio). Protegida com auth header.
+  2. Em app/data.jsx: em api.createPendencia e api.updatePendencia, se
+     payload.urgente === true, após salvar no Supabase chamar a Edge Function
+     com telefone do responsavel (campo a adicionar em profiles: telefone text)
+     e mensagem formatada.
+  3. Em app/usuarios.jsx/perfil.jsx: adicionar campo "Telefone (WhatsApp)" no
+     formulário de perfil, salvar em profiles.telefone, exibir com formatação.

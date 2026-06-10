@@ -1,4 +1,4 @@
-const STATIC_CACHE = 'ns-static-v7';
+const STATIC_CACHE = 'ns-static-v9';
 const CDN_CACHE    = 'ns-cdn-v1';
 const API_CACHE    = 'ns-api-v1';
 const ALL_CACHES   = [STATIC_CACHE, CDN_CACHE, API_CACHE];
@@ -23,6 +23,7 @@ const STATIC_FILES = [
   '/app/demandas.jsx',
   '/app/equipe.jsx',
   '/app/calendario.jsx',
+  '/app/workspace.jsx',
   '/app/feedback.jsx',
   '/app/usuarios.jsx',
   '/app/perfil.jsx',
@@ -39,6 +40,7 @@ const STATIC_FILES = [
   '/dist/app/demandas.js',
   '/dist/app/equipe.js',
   '/dist/app/calendario.js',
+  '/dist/app/workspace.js',
   '/dist/app/feedback.js',
   '/dist/app/usuarios.js',
   '/dist/app/perfil.js',

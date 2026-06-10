@@ -57,6 +57,14 @@ const IconList      = (p) => (<Icon {...p}><line x1="8" y1="6" x2="21" y2="6"/><
 const IconColumns   = (p) => (<Icon {...p}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></Icon>);
 const IconArchive   = (p) => (<Icon {...p}><path d="M3 9V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9"/><path d="M1 5h22v4H1z"/><path d="M10 13h4"/></Icon>);
 const IconRotateCcw = (p) => (<Icon {...p}><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></Icon>);
+const IconNote      = (p) => (<Icon {...p}><path d="M5 4h14a1 1 0 0 1 1 1v9l-6 6H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M14 20v-5a1 1 0 0 1 1-1h5"/></Icon>);
+const IconStar      = ({ filled, ...p }) => (<Icon {...p}><path d="m12 3 2.7 5.6 6.1.8-4.5 4.3 1.1 6L12 16.8 6.6 19.7l1.1-6L3.2 9.4l6.1-.8L12 3Z" fill={filled ? 'currentColor' : 'none'}/></Icon>);
+const IconShare     = (p) => (<Icon {...p}><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="5.5" r="2.5"/><circle cx="17" cy="18.5" r="2.5"/><path d="m8.3 10.8 6.4-4M8.3 13.2l6.4 4"/></Icon>);
+const IconPaperclip = (p) => (<Icon {...p}><path d="M21 12.5 12 21.5a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.85 1.85 0 0 1-2.6-2.6l8-8"/></Icon>);
+const IconFlow      = (p) => (<Icon {...p}><rect x="3" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="16" width="7" height="5" rx="1.5"/><path d="M6.5 8v4a2 2 0 0 0 2 2h7a2 2 0 0 1 2 2v0"/></Icon>);
+const IconBook      = (p) => (<Icon {...p}><path d="M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2Z"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M9 7h7"/></Icon>);
+const IconArrowLeft = (p) => (<Icon {...p}><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></Icon>);
+const IconLayout    = (p) => (<Icon {...p}><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18"/><path d="M9 9v12"/></Icon>);
 
 Object.assign(window, {
   Icon, IconLogo, IconHome, IconCheckSq, IconInbox, IconUsers, IconShield,
@@ -64,4 +72,6 @@ Object.assign(window, {
   IconChevRight, IconClose, IconBell, IconBolt, IconAlert, IconClock, IconCal,
   IconUser, IconMenu, IconFilter, IconHistory, IconCheck, IconCircle, IconDot,
   IconSpark, IconDrag, IconList, IconColumns, IconArchive, IconRotateCcw,
+  IconNote, IconStar, IconShare, IconPaperclip, IconFlow, IconBook,
+  IconArrowLeft, IconLayout,
 });

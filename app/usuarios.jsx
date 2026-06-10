@@ -132,7 +132,7 @@ const UsuarioModal = ({ open, onClose, editing, profile }) => {
                 <option value="gestor">Gestor</option>
               </Select>
             )}
-            {isSelf && <p className="text-[11px] text-gray-500 mt-1">Você não pode alterar seu próprio cargo.</p>}
+            {isSelf && <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Você não pode alterar seu próprio cargo.</p>}
           </div>
           {editing && (
             <div className="flex items-end pb-1">
@@ -215,7 +215,7 @@ const LabelsManager = ({ profile }) => {
               onChange={(e) => setNome(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreate(); } }}
               placeholder="Nome da etiqueta..."
-              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 rounded-lg px-3 h-9 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 w-48"
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 rounded-lg px-3 h-9 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 w-48"
             />
             <div className="flex items-center gap-1 flex-wrap">
               {LABEL_PRESET_COLORS.map(c => (
@@ -224,7 +224,7 @@ const LabelsManager = ({ profile }) => {
                   type="button"
                   onClick={() => setCor(c)}
                   title={c}
-                  className={`w-6 h-6 rounded-full transition-all ${cor === c ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'}`}
+                  className={`w-6 h-6 rounded-full transition-all ${cor === c ? 'ring-2 ring-offset-2 dark:ring-offset-gray-800 ring-gray-400 scale-110' : 'hover:scale-110'}`}
                   style={{ backgroundColor: c }}
                 />
               ))}
@@ -291,7 +291,7 @@ const Usuarios = ({ profile }) => {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size={14}/></span>
               <input value={q} onChange={(e) => setQ(e.target.value)}
                      placeholder="Buscar por nome ou e-mail..."
-                     className="bg-white border border-gray-300 rounded-lg pl-9 pr-3 h-10 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500" />
+                     className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg pl-9 pr-3 h-10 text-sm w-full sm:w-72 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500" />
             </div>
             <Btn icon={<IconPlus size={16}/>} onClick={() => setModal({ open: true, editing: null })}>
               Novo usuário
@@ -300,10 +300,10 @@ const Usuarios = ({ profile }) => {
         }
       />
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-card overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/60">
+            <tr className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50/60 dark:bg-gray-900/40">
               <th className="px-5 py-2.5">Nome</th>
               <th className="px-3 py-2.5">E-mail</th>
               <th className="px-3 py-2.5">Cargo</th>
@@ -311,44 +311,44 @@ const Usuarios = ({ profile }) => {
               <th className="px-3 py-2.5 text-right pr-5">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {filtered.map(u => (
-              <tr key={u.id} className="hover:bg-gray-50/70 transition-colors group">
+              <tr key={u.id} className="hover:bg-gray-50/70 dark:hover:bg-gray-700/40 transition-colors group">
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2.5">
                     <Avatar name={u.nome} src={u.avatar} size={28}/>
-                    <span className="font-medium text-gray-900">{u.nome}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{u.nome}</span>
                     {u.id === profile.id && <Badge tone="blue">Você</Badge>}
                   </div>
                 </td>
-                <td className="px-3 py-3 text-gray-600">{u.email}</td>
+                <td className="px-3 py-3 text-gray-600 dark:text-gray-300">{u.email}</td>
                 <td className="px-3 py-3">
                   <Badge tone={u.role === 'gestor' ? 'green' : 'gray'}>
                     {u.role === 'gestor' ? 'Gestor' : 'Funcionário'}
                   </Badge>
                 </td>
                 <td className="px-3 py-3">
-                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${u.ativo ? 'text-emerald-700' : 'text-gray-400'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${u.ativo ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${u.ativo ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${u.ativo ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
                     {u.ativo ? 'Ativo' : 'Inativo'}
                   </span>
                 </td>
                 <td className="px-3 py-3 text-right pr-5">
                   <div className="inline-flex items-center gap-1">
                     <button onClick={() => setModal({ open: true, editing: u })}
-                            className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100" title="Editar">
+                            className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" title="Editar">
                       <IconPencil size={14}/>
                     </button>
                     <button onClick={() => toggleActive(u)}
                             className={`px-2 h-7 rounded-md text-[11px] font-medium transition-colors
                               ${u.ativo
-                                ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                : 'text-emerald-700 hover:bg-emerald-50'}`}>
+                                ? 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'}`}>
                       {u.ativo ? 'Desativar' : 'Ativar'}
                     </button>
                     {u.id !== profile.id && (
                       <button onClick={() => deleteUser(u)}
-                              className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50" title="Excluir">
+                              className="p-1.5 rounded-md text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40" title="Excluir">
                         <IconTrash size={14}/>
                       </button>
                     )}

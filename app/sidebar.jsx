@@ -99,6 +99,13 @@ const Sidebar = ({ profile, page, onNavigate, onLogout, mobileOpen, onCloseMobil
               onClick={() => { onNavigate(it.id); onCloseMobile?.(); }}
             />
           ))}
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 px-3 pt-4 pb-1.5">Pessoal</div>
+          <NavItem
+            active={page === 'workspace'}
+            icon={<IconNote size={18} />}
+            label="Meu Workspace"
+            onClick={() => { onNavigate('workspace'); onCloseMobile?.(); }}
+          />
         </nav>
 
         {/* User card */}

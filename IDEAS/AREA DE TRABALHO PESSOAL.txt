@@ -1,0 +1,343 @@
+Você é um Arquiteto de Software Senior, Product Designer e Desenvolvedor Full Stack especialista em Next.js, React, TypeScript, Supabase, PostgreSQL, RLS, UX e Sistemas SaaS.
+
+Sua missão NÃO é apenas gerar código. Sua missão é projetar um módulo completo, escalável, intuitivo e pronto para produção dentro de um sistema já existente para uma Cooperativa de Saúde.
+
+## CONTEXTO DO SISTEMA
+
+O sistema já está em produção e possui:
+
+- Autenticação de usuários
+- Controle de permissões
+- Dashboard principal
+- Gestão de demandas
+- Gestão de pendências
+- Cadastro de usuários
+- Estrutura Supabase já funcional
+- Banco PostgreSQL
+- Ambiente Next.js
+
+NÃO quero recriar funcionalidades existentes.
+
+Quero desenvolver uma nova área chamada:
+
+# Workspace Pessoal
+
+Uma área exclusiva para cada usuário trabalhar, organizar ideias, planejar projetos, registrar informações e colaborar quando desejar.
+
+O conceito deve lembrar uma mistura simplificada entre:
+
+- Notion
+- Trello
+- Miro
+- Obsidian
+- Monday
+
+Porém MUITO MAIS SIMPLES.
+
+O foco é:
+
+- Simplicidade
+- Velocidade
+- Facilidade de uso
+- Baixa curva de aprendizado
+- Interface agradável
+- Excelente UX
+
+Não quero uma ferramenta corporativa complexa.
+
+Quero algo que um gestor, cooperado ou colaborador consiga utilizar em menos de 2 minutos sem treinamento.
+
+---
+
+# OBJETIVOS DE NEGÓCIO
+
+Reduzir:
+
+- uso de papel
+- anotações dispersas
+- grupos de WhatsApp
+- planilhas paralelas
+- perda de informações
+
+Centralizar:
+
+- ideias
+- lembretes
+- planejamentos
+- fluxos
+- projetos
+- documentação rápida
+
+Tudo dentro da plataforma.
+
+---
+
+# FUNCIONALIDADES PRINCIPAIS
+
+## 1. Bloco de Notas Inteligente
+
+O usuário deve poder:
+
+- criar notas
+- editar notas
+- arquivar notas
+- favoritar notas
+- pesquisar notas
+- fixar notas
+
+Visual:
+
+- estilo post-it moderno
+- visual limpo
+- sem poluição
+
+Animações:
+
+- nota sendo "fixada" com clipe de papel
+- leve efeito de empilhamento
+- hover elegante
+
+---
+
+## 2. Quadro de Projetos
+
+O usuário deve poder:
+
+- criar projetos
+- criar listas
+- criar tarefas
+- arrastar tarefas
+
+Modelo:
+
+Backlog
+Em andamento
+Aguardando
+Concluído
+
+Drag and Drop obrigatório.
+
+---
+
+## 3. Fluxogramas
+
+O usuário deve poder:
+
+- criar fluxos simples
+- conectar etapas
+- mover blocos
+
+Exemplos:
+
+- Processo de autorização
+- Processo financeiro
+- Fluxo de atendimento
+- Fluxo operacional
+
+Não quero complexidade nível BPM.
+
+Quero simplicidade semelhante ao Excalidraw ou Miro básico.
+
+---
+
+## 4. Área de Conhecimento Pessoal
+
+Permitir:
+
+- armazenar procedimentos
+- checklists
+- documentos rápidos
+- aprendizados
+
+Formato:
+
+Cards organizados por categoria.
+
+---
+
+## 5. Compartilhamento
+
+Por padrão:
+
+Tudo privado.
+
+O usuário pode:
+
+- compartilhar projeto
+- compartilhar nota
+- compartilhar fluxo
+
+Permissões:
+
+VIEW
+COMMENT
+EDIT
+
+Implementar modelo semelhante ao Google Docs.
+
+---
+
+# EXPERIÊNCIA DO USUÁRIO
+
+A experiência deve transmitir:
+
+- organização
+- leveza
+- produtividade
+
+Evitar:
+
+- excesso de menus
+- excesso de botões
+- excesso de configurações
+
+Pergunta constante:
+
+"Um usuário comum conseguiria entender isso em menos de 30 segundos?"
+
+Se a resposta for não, simplifique.
+
+---
+
+# DESIGN SYSTEM
+
+Visual desejado:
+
+- moderno
+- clean
+- profissional
+- elegante
+
+Inspirado em:
+
+- Linear
+- Notion
+- Raycast
+- Vercel Dashboard
+
+Animações:
+
+- Framer Motion
+- microinterações suaves
+- transições rápidas
+- sem exageros
+
+Desejo elementos visuais como:
+
+- clipe de papel animado para fixar notas
+- cards com profundidade leve
+- drag and drop fluido
+- feedback visual imediato
+
+Objetivo:
+
+O usuário sentir prazer em utilizar o sistema.
+
+---
+
+# BANCO DE DADOS
+
+Projete toda a modelagem.
+
+Entregue:
+
+- tabelas
+- relacionamentos
+- índices
+- foreign keys
+- constraints
+
+Considere:
+
+workspace
+notes
+projects
+boards
+tasks
+flowcharts
+flow_nodes
+flow_connections
+knowledge_cards
+shares
+permissions
+
+Mas fique livre para melhorar a arquitetura.
+
+---
+
+# SEGURANÇA
+
+Utilizar RLS em tudo.
+
+Entregar:
+
+- políticas completas
+- regras de acesso
+- regras de compartilhamento
+
+Garantir que:
+
+- nenhum usuário visualize dados privados de outro
+- compartilhamentos respeitem permissões
+- consultas sejam performáticas
+
+---
+
+# ARQUITETURA FRONTEND
+
+Defina:
+
+- estrutura de pastas
+- componentes
+- hooks
+- services
+- contextos
+- providers
+
+Utilizando:
+
+- Next.js App Router
+- TypeScript
+- Tailwind
+- Shadcn UI
+- Supabase
+
+---
+
+# PERFORMANCE
+
+Projetar pensando em:
+
+- milhares de usuários
+- milhares de notas
+- milhares de tarefas
+
+Evitar:
+
+- queries desnecessárias
+- re-renderizações excessivas
+- estruturas mal escaláveis
+
+---
+
+# ENTREGA OBRIGATÓRIA
+
+Quero uma resposta extremamente detalhada contendo:
+
+1. Visão geral do produto.
+2. Fluxo completo do usuário.
+3. Wireframe textual de cada tela.
+4. Arquitetura do frontend.
+5. Arquitetura do backend.
+6. Modelagem completa do banco.
+7. Políticas RLS.
+8. Estrutura de componentes.
+9. Estratégia de compartilhamento.
+10. Estratégia de animações.
+11. Plano de implementação em etapas.
+12. Possíveis problemas futuros e como evitá-los.
+13. Melhorias futuras para evolução do módulo.
+
+Não gere apenas exemplos.
+
+Projete como um arquiteto de software construindo um produto real que será utilizado diariamente por gestores e cooperados em ambiente de produção.
