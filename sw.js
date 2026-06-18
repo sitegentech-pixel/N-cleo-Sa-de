@@ -4,6 +4,7 @@ const API_CACHE    = 'ns-api-v1';
 const ALL_CACHES   = [STATIC_CACHE, CDN_CACHE, API_CACHE];
 
 const STATIC_FILES = [
+  '/index.html',
   '/index.prod.html',
   '/manifest.json',
   '/favicon.ico',
@@ -58,7 +59,11 @@ const SUPABASE_ORIGIN = 'https://fmxgsqkxhcbydvaqzefs.supabase.co';
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_FILES))
+    // { cache: 'reload' } bypasses the browser HTTP cache (which marks /dist/
+    // as immutable) so the precache is always populated with fresh files.
+    caches.open(STATIC_CACHE).then(cache =>
+      cache.addAll(STATIC_FILES.map(u => new Request(u, { cache: 'reload' })))
+    )
   );
   self.skipWaiting();
 });
@@ -79,7 +84,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
 
   if (url.origin === SUPABASE_ORIGIN) {
-    event.respondWith(networkFirst(request, API_CACHE));
+    event.respondWith(apiNetworkFirst(request, API_CACHE));
     return;
   }
 
@@ -88,26 +93,27 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // App shell (HTML navigations) and compiled app JS must always reflect the
-  // latest deploy — use network-first so a new build is picked up immediately,
-  // falling back to cache only when offline.
-  if (request.mode === 'navigate' || url.pathname.startsWith('/dist/')) {
-    event.respondWith(networkFirst(request, STATIC_CACHE));
-    return;
-  }
-
-  event.respondWith(cacheFirst(request, STATIC_CACHE));
+  // Our own HTML + compiled JS + assets: network-first so a new deploy always
+  // wins over stale cache. Falls back to cache when offline.
+  event.respondWith(networkFirst(request, STATIC_CACHE));
 });
 
-async function cacheFirst(request, cacheName) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-  const response = await fetch(request);
-  if (response.ok) {
-    const cache = await caches.open(cacheName);
-    cache.put(request, response.clone());
+async function networkFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    // cache: 'reload' bypasses the immutable HTTP cache on /dist/ assets.
+    const response = await fetch(request, { cache: 'reload' });
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    if (request.mode === 'navigate') {
+      const fallback = await cache.match('/index.prod.html');
+      if (fallback) return fallback;
+    }
+    return Response.error();
   }
-  return response;
 }
 
 async function staleWhileRevalidate(request, cacheName) {
@@ -120,7 +126,7 @@ async function staleWhileRevalidate(request, cacheName) {
   return cached || fetchPromise;
 }
 
-async function networkFirst(request, cacheName) {
+async function apiNetworkFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   try {
     const response = await fetch(request);
