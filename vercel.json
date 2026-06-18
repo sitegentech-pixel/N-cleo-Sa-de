@@ -1,7 +1,10 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": ".",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.prod.html" }],
+  "rewrites": [
+    { "source": "/", "destination": "/index.prod.html" },
+    { "source": "/(.*)", "destination": "/index.prod.html" }
+  ],
   "headers": [
     {
       "source": "/dist/(.*)",
