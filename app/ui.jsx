@@ -417,69 +417,12 @@ const KeyboardShortcuts = ({ onNavigate }) => {
   );
 };
 
-// ---------- Onboarding Tour ----------
-const OnboardingTour = () => {
-  const [step, setStep] = React.useState(0);
-  const [open, setOpen] = React.useState(false);
-  
-  React.useEffect(() => {
-    const seen = localStorage.getItem('ns_tour_seen');
-    if (!seen) {
-      setTimeout(() => setOpen(true), 1500);
-    }
-  }, []);
-
-  const finish = () => {
-    localStorage.setItem('ns_tour_seen', 'true');
-    setOpen(false);
-    toast('Tour finalizado! Bem-vindo ao Núcleo Saúde.');
-  };
-
-  const steps = [
-    { title: "Bem-vindo ao Núcleo Saúde", text: "Este pequeno tour vai te mostrar como ser mais produtivo no sistema. Você pode acessá-lo usando o teclado!" },
-    { title: "Atalhos Globais", text: "Pressione '?' em qualquer lugar para ver a lista de atalhos. Use 'D', 'P', 'M' ou 'E' para navegar rapidamente entre as telas." },
-    { title: "Busca Rápida", text: "Perdeu uma demanda? Pressione '/' no teclado para abrir a busca global instantaneamente." },
-    { title: "Menções e Notificações", text: "Nas demandas, digite '@' nos comentários para marcar alguém da equipe. Eles serão notificados aqui no topo." },
-    { title: "Tudo pronto!", text: "Sua equipe agora trabalha sincronizada. Clique em Concluir para começar." }
-  ];
-
-  if (!open) return null;
-  const s = steps[step];
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="ns-pop-in bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border dark:border-gray-700">
-        <div className="bg-brand-50 dark:bg-brand-950/40 px-6 py-8 text-center relative border-b border-brand-100 dark:border-brand-900">
-          <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 text-brand-600 dark:text-brand-400">
-            <IconSpark size={24} />
-          </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{s.title}</h3>
-          <div className="flex justify-center gap-1.5 mt-4">
-            {steps.map((_, i) => (
-              <span key={i} className={`w-2 h-2 rounded-full ${i === step ? 'bg-brand-500' : 'bg-brand-200 dark:bg-gray-700'}`} />
-            ))}
-          </div>
-        </div>
-        <div className="p-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-6">{s.text}</p>
-          <div className="flex gap-2">
-            {step < steps.length - 1 ? (
-              <>
-                <Btn kind="ghost" className="flex-1" onClick={finish}>Pular</Btn>
-                <Btn className="flex-1" onClick={() => setStep(x => x + 1)}>Próximo <IconChevRight size={14}/></Btn>
-              </>
-            ) : (
-              <Btn className="w-full" onClick={finish} icon={<IconCheck size={16}/>}>Concluir Tour</Btn>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+// OnboardingTour (the spotlight version) lives in extras.jsx. An older modal-based
+// copy used to live here too, which collided ("already declared") and aborted
+// extras.js. Removed — extras.jsx is the single source of truth.
 
 Object.assign(window, {
   toast, ToastHost, Spinner, Badge, StatusBadgePend, StatusBadgeDem, Avatar,
   EmptyState, Modal, Drawer, Btn, Label, Input, Textarea, Select, Checkbox, FieldError,
-  SegTabs, confirmAction, GlobalSearch, KeyboardShortcuts, OnboardingTour
+  SegTabs, confirmAction, GlobalSearch, KeyboardShortcuts
 });

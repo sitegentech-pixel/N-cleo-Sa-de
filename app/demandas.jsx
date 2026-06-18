@@ -1,14 +1,7 @@
 // Demandas — table view + modal with edit history.
 
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 768);
-  React.useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-  return isMobile;
-};
+// useIsMobile is defined in pendencias.jsx (loaded before this file) and shared as
+// a global. Re-declaring it here throws "already declared" and aborts this script.
 
 const DemandaCard = ({ d, onEdit, onDelete, canDelete, onDragStart, onDragEnd, dragging, isMobile, colIndex, onMove, isGestor }) => {
   const store = useStore();

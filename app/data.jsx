@@ -3,7 +3,11 @@
 const SUPABASE_URL      = 'https://fmxgsqkxhcbydvaqzefs.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wDyj0YBxO4fUl0ZfSfSWFg_T8x4wtgI';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// The Supabase CDN UMD already created a global `supabase`. Declaring a top-level
+// `const supabase` here collides with that global ("Identifier 'supabase' has
+// already been declared") and aborts this entire script. Overwrite the global with
+// the client instead so every bare `supabase.*` reference resolves to it.
+window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---------- helpers (globals) ----------
 const formatDate = (iso) => iso
