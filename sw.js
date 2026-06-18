@@ -1,10 +1,9 @@
-const STATIC_CACHE = 'ns-static-v10';
+const STATIC_CACHE = 'ns-static-v11';
 const CDN_CACHE    = 'ns-cdn-v1';
 const API_CACHE    = 'ns-api-v1';
 const ALL_CACHES   = [STATIC_CACHE, CDN_CACHE, API_CACHE];
 
 const STATIC_FILES = [
-  '/index.html',
   '/index.prod.html',
   '/manifest.json',
   '/favicon.ico',
@@ -86,6 +85,14 @@ self.addEventListener('fetch', event => {
 
   if (CDN_ORIGINS.some(o => request.url.startsWith(o))) {
     event.respondWith(staleWhileRevalidate(request, CDN_CACHE));
+    return;
+  }
+
+  // App shell (HTML navigations) and compiled app JS must always reflect the
+  // latest deploy — use network-first so a new build is picked up immediately,
+  // falling back to cache only when offline.
+  if (request.mode === 'navigate' || url.pathname.startsWith('/dist/')) {
+    event.respondWith(networkFirst(request, STATIC_CACHE));
     return;
   }
 
